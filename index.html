@@ -11,7 +11,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600;700&display=swap"
       rel="stylesheet"
     />
     <link rel="stylesheet" href="styles.css" />
@@ -25,7 +25,7 @@
         <li><a href="#research">Research</a></li>
         <li><a href="#experience">Experience</a></li>
         <li><a href="#projects">Projects</a></li>
-        <li><a href="#photography">Photography</a></li>
+        <li><a href="#outside">Outside</a></li>
       </ul>
     </nav>
 
@@ -49,7 +49,7 @@
           >
           <span aria-hidden="true">·</span>
           <!-- Add your LinkedIn URL below -->
-          <a href="#" target="_blank" rel="noopener">LinkedIn</a>
+          <a href="https://www.linkedin.com/in/christopher-pattullo/" target="_blank" rel="noopener">LinkedIn</a>
         </nav>
       </header>
 
@@ -85,14 +85,15 @@
           <p class="blurb">
             I joined Professor Martin Nisser's Programmable Matter Lab to work
             on WireBend-Kit, a machine that automatically bends wire into
-            arbitrary 3D shapes. My main contribution was building a
+            3D wireframes. My main contribution was building a
             closed-loop feedback system: I added electronic sensing to estimate
             the actual bend angle after each actuation, then fed that error
             back into the control loop to apply a correction pass. Along the
             way I consolidated firmware across multiple microcontrollers down
             to a single board and rewrote the Python GUI to be more intuitive
-            for iterative testing. It's been a satisfying introduction to
-            hardware-in-the-loop control systems.
+            for iterative testing. It's been a fascinating introduction to
+            hardware-in-the-loop control systems, and I am excited to continue 
+            exploring similar systems.
           </p>
         </article>
       </section>
@@ -117,7 +118,7 @@
             into structured spreadsheets, which saved a lot of tedious manual
             work. I also rewrote large sections of customer-facing
             documentation based on support ticket feedback; those revised
-            datasheets reduced follow-up clarification requests by about 21%.
+            datasheets reduced follow-up clarification requests by approximately 21%.
           </p>
         </article>
 
@@ -136,7 +137,7 @@
             interfaces — with LTspice simulation before committing to layout.
             The firmware side runs on embedded Rust using the Embassy async
             runtime. A notable mechanical contribution: I redesigned the
-            ball-feeding mechanism by lowering the hopper and repositioning
+            ball-feeding mechanism by changing to a bottom fed architecture and repositioning
             the turret so its center of gravity sat directly over the yaw
             axis, which meaningfully improved aiming stability.
           </p>
@@ -195,26 +196,56 @@
 
           <article class="card card--featured">
             <figure class="card-media card-media--featured">
-              <!-- replace div with: <img src="path/to/photo.jpg" alt="ARUW competition robot"> -->
+              <img
+                src="photos/2026CompletedSentry.PNG"
+                alt="ARUW sentry robot with redesigned bottom-fed turret"
+                loading="lazy"
+                decoding="async">
+            </figure>
+            <div class="card-body">
+              <h3><a href="projects/turret-overhaul.html" class="card-link">Bottom-Fed Turret Overhaul</a></h3>
+              <p class="blurb">
+                I rearchitected the ARUW competition robot's ball-feeding
+                system from a top-fed to a bottom-fed layout. The original
+                design stacked the hopper above the turret, which raised the
+                center of gravity and made the yaw axis oscillate during fast
+                moves. Moving the feed underneath let me sit the turret's
+                center of gravity directly over the yaw axis — aiming stability
+                jumped immediately. I also redesigned the minor turret,
+                dropping its weight 41% while expanding the range of motion.
+              </p>
+              <div class="tags">
+                <span class="tag">SolidWorks</span>
+                <span class="tag">Mechanical Design</span>
+                <span class="tag">DFM</span>
+                <span class="tag">RoboMasters</span>
+              </div>
+            </div>
+          </article>
+
+          <article class="card card--featured">
+            <figure class="card-media card-media--featured">
+              <!-- replace div with: <img src="photos/custom-controller.jpg" alt="Custom operator controller PCB"> -->
               <div class="img-placeholder">[ photo ]</div>
             </figure>
             <div class="card-body">
-              <h3><a href="projects/aruw-robot.html" class="card-link">ARUW Competition Robot Hardware</a></h3>
+              <h3><a href="projects/custom-controller.html" class="card-link">Custom Robot Controller</a></h3>
               <p class="blurb">
-                The hardware I've built for the ARUW competition robot spans
-                power distribution boards, sensor breakouts, and custom motor
-                driver interfaces — all designed in Altium with LTspice
-                simulation before layout. The firmware runs on embedded Rust
-                using the Embassy framework. Getting a real-time async Rust
-                HAL working on our specific microcontroller required digging
-                into register-level peripheral documentation and writing
-                several drivers from scratch.
+                A purpose-built USB HID controller I designed for operating
+                the ARUW robot — a replacement for using a keyboard during
+                competition. Twenty keys on a 4×5 matrix, running on an
+                ATmega32U4 that enumerates directly as a keyboard on the
+                host PC. I designed the schematic and PCB in Altium, wrote
+                the matrix-scan firmware in C, and flashed the bare chip
+                using Arduino as ISP rather than going through a bootloader.
+                It's currently deployed and used for live robot control.
               </p>
               <div class="tags">
-                <span class="tag">Rust / Embassy</span>
+                <span class="tag">ATmega32U4</span>
+                <span class="tag">C / Arduino</span>
                 <span class="tag">Altium</span>
+                <span class="tag">USB HID</span>
                 <span class="tag">PCB Design</span>
-                <span class="tag">LTspice</span>
               </div>
             </div>
           </article>
@@ -418,58 +449,66 @@
         </div>
       </section>
 
-      <!-- ───────── Photography ───────── -->
-      <section class="section" id="photography">
-        <h2>Photography</h2>
-        <p class="section-lead">
-          I shoot mostly landscapes and nature — the PNW gives you a lot to
-          work with.
-        </p>
-        <div class="photo-grid">
-
-          <figure class="photo-slot">
-            <!-- replace div with: <img src="path/to/photo.jpg" alt="..."> -->
-            <div class="img-placeholder">[ photo ]</div>
-            <figcaption></figcaption>
-          </figure>
-
-          <figure class="photo-slot">
-            <div class="img-placeholder">[ photo ]</div>
-            <figcaption></figcaption>
-          </figure>
-
-          <figure class="photo-slot">
-            <div class="img-placeholder">[ photo ]</div>
-            <figcaption></figcaption>
-          </figure>
-
-          <figure class="photo-slot">
-            <div class="img-placeholder">[ photo ]</div>
-            <figcaption></figcaption>
-          </figure>
-
-          <figure class="photo-slot">
-            <div class="img-placeholder">[ photo ]</div>
-            <figcaption></figcaption>
-          </figure>
-
-          <figure class="photo-slot">
-            <div class="img-placeholder">[ photo ]</div>
-            <figcaption></figcaption>
-          </figure>
-
-        </div>
-      </section>
-
-      <!-- ───────── Outside ───────── -->
+      <!-- ───────── Outside of work ───────── -->
       <section class="section" id="outside">
         <h2>Outside of work</h2>
-        <p>
+        <p class="section-lead">
           When I'm not at a workbench I'm usually behind a camera, hiking
           somewhere in the PNW, tinkering with a side project, or feeding
           something into the 3D printer. The making and the breaking are kind
-          of the same hobby.
+          of the same hobby. A few frames from recent trips below.
         </p>
+        <div class="photo-grid" id="photoGrid">
+
+          <!-- 6 featured previews -->
+          <figure class="photo-slot"><img src="photos/_DSC3025.jpg" alt="Photograph" loading="lazy" decoding="async"></figure>
+          <figure class="photo-slot"><img src="photos/_DSC0544.jpg" alt="Photograph" loading="lazy" decoding="async"></figure>
+          <figure class="photo-slot"><img src="photos/_DSC5443.jpg" alt="Photograph" loading="lazy" decoding="async"></figure>
+          <figure class="photo-slot"><img src="photos/_DSC1538.jpg" alt="Photograph" loading="lazy" decoding="async"></figure>
+          <figure class="photo-slot"><img src="photos/_DSC3371.jpg" alt="Photograph" loading="lazy" decoding="async"></figure>
+          <figure class="photo-slot"><img src="photos/_DSC1311.jpg" alt="Photograph" loading="lazy" decoding="async"></figure>
+
+          <!-- 29 remaining — hidden until "Show all" is clicked -->
+          <figure class="photo-slot photo-extra"><img src="photos/_DSC5460.jpg" alt="Photograph" loading="lazy" decoding="async"></figure>
+          <figure class="photo-slot photo-extra"><img src="photos/_DSC5446.jpg" alt="Photograph" loading="lazy" decoding="async"></figure>
+          <figure class="photo-slot photo-extra"><img src="photos/_DSC5445.jpg" alt="Photograph" loading="lazy" decoding="async"></figure>
+          <figure class="photo-slot photo-extra"><img src="photos/_DSC5444.jpg" alt="Photograph" loading="lazy" decoding="async"></figure>
+          <figure class="photo-slot photo-extra"><img src="photos/_DSC4633.jpg" alt="Photograph" loading="lazy" decoding="async"></figure>
+          <figure class="photo-slot photo-extra"><img src="photos/_DSC4582.jpg" alt="Photograph" loading="lazy" decoding="async"></figure>
+          <figure class="photo-slot photo-extra"><img src="photos/_DSC3784.jpg" alt="Photograph" loading="lazy" decoding="async"></figure>
+          <figure class="photo-slot photo-extra"><img src="photos/_DSC3417.jpg" alt="Photograph" loading="lazy" decoding="async"></figure>
+          <figure class="photo-slot photo-extra"><img src="photos/_DSC3388.jpg" alt="Photograph" loading="lazy" decoding="async"></figure>
+          <figure class="photo-slot photo-extra"><img src="photos/_DSC3018.jpg" alt="Photograph" loading="lazy" decoding="async"></figure>
+          <figure class="photo-slot photo-extra"><img src="photos/_DSC3017.jpg" alt="Photograph" loading="lazy" decoding="async"></figure>
+          <figure class="photo-slot photo-extra"><img src="photos/_DSC3015.jpg" alt="Photograph" loading="lazy" decoding="async"></figure>
+          <figure class="photo-slot photo-extra"><img src="photos/_DSC2886.jpg" alt="Photograph" loading="lazy" decoding="async"></figure>
+          <figure class="photo-slot photo-extra"><img src="photos/_DSC2607.jpg" alt="Photograph" loading="lazy" decoding="async"></figure>
+          <figure class="photo-slot photo-extra"><img src="photos/_DSC2578.jpg" alt="Photograph" loading="lazy" decoding="async"></figure>
+          <figure class="photo-slot photo-extra"><img src="photos/_DSC2345.jpg" alt="Photograph" loading="lazy" decoding="async"></figure>
+          <figure class="photo-slot photo-extra"><img src="photos/_DSC2043.jpg" alt="Photograph" loading="lazy" decoding="async"></figure>
+          <figure class="photo-slot photo-extra"><img src="photos/_DSC1678.jpg" alt="Photograph" loading="lazy" decoding="async"></figure>
+          <figure class="photo-slot photo-extra"><img src="photos/_DSC1607.jpg" alt="Photograph" loading="lazy" decoding="async"></figure>
+          <figure class="photo-slot photo-extra"><img src="photos/_DSC1604.jpg" alt="Photograph" loading="lazy" decoding="async"></figure>
+          <figure class="photo-slot photo-extra"><img src="photos/_DSC1603.jpg" alt="Photograph" loading="lazy" decoding="async"></figure>
+          <figure class="photo-slot photo-extra"><img src="photos/_DSC1602.jpg" alt="Photograph" loading="lazy" decoding="async"></figure>
+          <figure class="photo-slot photo-extra"><img src="photos/_DSC1031.jpg" alt="Photograph" loading="lazy" decoding="async"></figure>
+          <figure class="photo-slot photo-extra"><img src="photos/_DSC1030.jpg" alt="Photograph" loading="lazy" decoding="async"></figure>
+          <figure class="photo-slot photo-extra"><img src="photos/_DSC0989.jpg" alt="Photograph" loading="lazy" decoding="async"></figure>
+          <figure class="photo-slot photo-extra"><img src="photos/_DSC0724.jpg" alt="Photograph" loading="lazy" decoding="async"></figure>
+          <figure class="photo-slot photo-extra"><img src="photos/_DSC0670.jpg" alt="Photograph" loading="lazy" decoding="async"></figure>
+          <figure class="photo-slot photo-extra"><img src="photos/_DSC0564.jpg" alt="Photograph" loading="lazy" decoding="async"></figure>
+          <figure class="photo-slot photo-extra"><img src="photos/_DSC0551.jpg" alt="Photograph" loading="lazy" decoding="async"></figure>
+
+        </div>
+
+        <button
+          type="button"
+          class="gallery-toggle"
+          id="galleryToggle"
+          aria-expanded="false"
+          aria-controls="photoGrid">
+          Show all 35 photos
+        </button>
       </section>
 
       <!-- ───────── Footer ───────── -->
@@ -481,5 +520,24 @@
       </footer>
 
     </main>
+
+    <script>
+      // Gallery expand/collapse
+      (function () {
+        const btn = document.getElementById('galleryToggle');
+        const grid = document.getElementById('photoGrid');
+        if (!btn || !grid) return;
+
+        const totalCount = grid.querySelectorAll('.photo-slot').length;
+
+        btn.addEventListener('click', function () {
+          const expanded = grid.classList.toggle('expanded');
+          btn.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+          btn.textContent = expanded
+            ? 'Show fewer photos'
+            : 'Show all ' + totalCount + ' photos';
+        });
+      })();
+    </script>
   </body>
 </html>

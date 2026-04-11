@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Bottom-Fed Turret Overhaul — Christopher Pattullo</title>
+    <meta
+      name="description"
+      content="Mechanical redesign of the ARUW sentry robot turret: top-fed to bottom-fed architecture, center-of-gravity alignment with the yaw axis, and a 41% lighter minor turret with expanded range of motion."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../styles.css" />
+  </head>
+  <body>
+
+    <nav class="sticky-nav" aria-label="Site navigation">
+      <a class="nav-back" href="../index.html">← Christopher Pattullo</a>
+      <ul class="nav-links">
+        <li><a href="../index.html#projects">Projects</a></li>
+        <li><a href="../index.html#experience">Experience</a></li>
+        <li><a href="../index.html#about">About</a></li>
+      </ul>
+    </nav>
+
+    <main class="page project-page">
+
+      <header class="project-hero">
+        <a class="project-back" href="../index.html#projects">← All projects</a>
+        <h1>Bottom-Fed Turret Overhaul</h1>
+        <p class="project-tagline">
+          A full mechanical rework of the ARUW sentry robot's turret —
+          switching from a top-fed to a bottom-fed architecture, aligning the
+          center of gravity with the yaw axis, and cutting the minor turret
+          weight by 41%.
+        </p>
+        <div class="tags">
+          <span class="tag">SolidWorks</span>
+          <span class="tag">Mechanical Design</span>
+          <span class="tag">DFM</span>
+          <span class="tag">RoboMasters</span>
+        </div>
+      </header>
+
+      <section class="project-section">
+        <h2>Why redesign it</h2>
+        <p>
+          The 2025 sentry used a top-fed ball hopper, which placed a large
+          mass high on the robot. That worked fine statically, but the moment
+          the turret started doing fast yaw moves, the high center of gravity
+          produced noticeable oscillation — the minor turret would settle after
+          a traversal instead of snapping to target. For a competition where
+          hit probability depends on how quickly the robot can track and fire,
+          that settle time is expensive.
+        </p>
+        <p>
+          A secondary issue was mass distribution: the old minor turret was
+          overbuilt in several places, with material added defensively rather
+          than analytically. That added inertia on both yaw and pitch axes,
+          which made the existing motors work harder and limited how
+          aggressively we could tune the control loops.
+        </p>
+      </section>
+
+      <section class="project-section">
+        <h2>What I changed</h2>
+
+        <h3>Top-fed → bottom-fed feeding path</h3>
+        <p>
+          I redesigned the ball-feeding path so the hopper sits low in the
+          chassis and balls are lifted into the shooter from underneath. That
+          dropped the overall center of mass significantly. More importantly,
+          it let me reposition the turret assembly so the combined CoG of the
+          turret sits directly over the yaw axis — meaning rapid yaw moves
+          don't create a lever arm fighting the drive motors.
+        </p>
+
+        <h3>Minor turret: 41% lighter</h3>
+        <p>
+          I went through the minor turret part by part and redesigned any
+          component where the material wasn't doing structural work. The new
+          version is 41% lighter than the 2025 revision while being <em>more</em>
+          rigid in the critical bending directions, and it expanded both the
+          yaw and pitch range of motion. Lighter + stiffer + more range is
+          normally a three-way tradeoff, and reaching it took a lot of FEA
+          iterations and a willingness to throw out parts I'd already spent
+          time on.
+        </p>
+
+        <h3>Assembly and serviceability</h3>
+        <p>
+          One thing I learned from the 2025 robot was that parts you can't
+          easily remove become parts you don't service. I redesigned the
+          mounting interfaces so the whole minor turret can be removed as a
+          subassembly for maintenance — important at competition, where time
+          between matches is short.
+        </p>
+      </section>
+
+      <div class="media-grid media-grid--3">
+        <figure class="media-slot">
+          <img
+            src="../photos/2025SentryCad.png"
+            alt="2025 ARUW sentry robot CAD model"
+            loading="lazy"
+            decoding="async">
+          <figcaption>2025 sentry — top-fed architecture</figcaption>
+        </figure>
+        <figure class="media-slot">
+          <img
+            src="../photos/2026SentryCad.png"
+            alt="2026 ARUW sentry robot CAD model"
+            loading="lazy"
+            decoding="async">
+          <figcaption>2026 sentry — bottom-fed redesign</figcaption>
+        </figure>
+        <figure class="media-slot">
+          <img
+            src="../photos/2026CompletedSentry.PNG"
+            alt="Completed 2026 ARUW sentry robot"
+            loading="lazy"
+            decoding="async">
+          <figcaption>2026 sentry — assembled</figcaption>
+        </figure>
+        <figure class="media-slot">
+          <video
+            src="../videos/SentryMinorNeck_Proto.MP4"
+            autoplay
+            muted
+            loop
+            playsinline
+            preload="metadata"
+            aria-label="Minor neck turret prototype in motion">
+          </video>
+          <figcaption>Minor neck prototype — bench test</figcaption>
+        </figure>
+        <figure class="media-slot media-slot--wide">
+          <video
+            src="../videos/SentryMatchPerformance.MOV"
+            controls
+            preload="metadata"
+            aria-label="ARUW sentry during a RoboMasters match">
+            Your browser can't play this video format.
+            <a href="../videos/SentryMatchPerformance.MOV">Download the video</a>.
+          </video>
+          <figcaption>Match performance</figcaption>
+        </figure>
+      </div>
+
+      <section class="project-section">
+        <h2>Results</h2>
+        <p>
+          Aiming stability improved noticeably — fast yaw traversals settle
+          faster because there's no longer a high-mounted mass swinging past
+          the target. The lower-inertia minor turret also let the firmware
+          team tune pitch and yaw loops more aggressively without running into
+          mechanical resonances.
+        </p>
+        <p>
+          On the practical side, the bottom-fed hopper holds more balls, is
+          faster to reload between rounds, and the serviceable minor turret
+          subassembly has paid for itself every time we've needed to swap a
+          motor or inspect a bearing at competition.
+        </p>
+      </section>
+
+      <section class="project-section">
+        <h2>What I'd do differently</h2>
+        <p>
+          I'd build a dynamic model of the turret — inertia tensor, motor
+          torque curves, and the control loop — earlier in the design phase.
+          A lot of the CoG and weight-reduction work was informed by intuition
+          and single-variable FEA runs, and a simulation would have let me
+          quantify the tradeoffs instead of arguing them by feel. It also
+          would have caught a couple of iterations that looked good on paper
+          but didn't actually reduce the settling time much.
+        </p>
+      </section>
+
+    </main>
+  </body>
+</html>

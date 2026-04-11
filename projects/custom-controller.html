@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Custom Robot Controller — Christopher Pattullo</title>
+    <meta
+      name="description"
+      content="ATmega32U4-based USB HID controller for the ARUW sentry robot: custom Altium PCB, C matrix-scan firmware, and Arduino-as-ISP flashing. Currently deployed for live robot control."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../styles.css" />
+  </head>
+  <body>
+
+    <nav class="sticky-nav" aria-label="Site navigation">
+      <a class="nav-back" href="../index.html">← Christopher Pattullo</a>
+      <ul class="nav-links">
+        <li><a href="../index.html#projects">Projects</a></li>
+        <li><a href="../index.html#experience">Experience</a></li>
+        <li><a href="../index.html#about">About</a></li>
+      </ul>
+    </nav>
+
+    <main class="page project-page">
+
+      <header class="project-hero">
+        <a class="project-back" href="../index.html#projects">← All projects</a>
+        <h1>Custom Robot Controller</h1>
+        <p class="project-tagline">
+          A bespoke operator controller for the ARUW sentry robot — custom
+          Altium PCB, ATmega32U4 with native USB, 4×5 key matrix, and
+          C++ firmware. Currently deployed and used for
+          live robot control.
+        </p>
+        <div class="tags">
+          <span class="tag">ATmega32U4</span>
+          <span class="tag">C++ / Arduino</span>
+          <span class="tag">Altium</span>
+          <span class="tag">USB HID</span>
+          <span class="tag">PCB Design</span>
+          <span class="tag">Hardware Debugging</span>
+        </div>
+      </header>
+
+      <section class="project-section">
+        <h2>Why build our own</h2>
+        <p>
+          Off-the-shelf game controllers and keyboards don't map well to how
+          an operator actually drives a RoboMasters robot. We wanted a
+          controller where the physical layout matched the action we were
+          performing — dedicated keys for mode switches, firing groups, and
+          movement states — without having to memorize a generic keyboard
+          binding or fight a gamepad's analog dead zones. The right answer
+          was a purpose-built input device that enumerates as a standard USB
+          HID so the robot control stack doesn't need a special driver.
+        </p>
+      </section>
+
+      <section class="project-section">
+        <h2>Hardware</h2>
+
+        <h3>ATmega32U4 with native USB</h3>
+        <p>
+          I picked the ATmega32U4 because it has built-in USB — no separate
+          USB-to-serial bridge chip, no CP2102, just the MCU talking USB
+          directly. That keeps the bill of materials small and makes the
+          board cheaper to assemble. It's also the same silicon as the Arduino
+          Leonardo and Pro Micro, so the toolchain and HID libraries are
+          well-trodden ground.
+        </p>
+
+        <h3>4×5 key matrix</h3>
+        <p>
+          The board exposes 20 buttons arranged as a 4-row by 5-column matrix.
+          Rows drive from <code>PB4–PB7</code> (four GPIOs configured as
+          active-low outputs), columns read on <code>PD7, PD6, PD4, PD1,
+          PD0</code> with internal pull-ups enabled. Matrixing 20 keys into 9
+          pins instead of 20 keeps the PCB small and leaves room on the MCU
+          for other peripherals later.
+        </p>
+
+        <h3>PCB layout in Altium</h3>
+        <p>
+          I laid the board out in Altium — schematic capture through layout
+          and Gerber generation. Key decisions: keeping the USB differential
+          pair short and impedance-controlled, placing the crystal near the
+          MCU with a solid ground pour underneath, and putting the key
+          footprints on a grid that matches the enclosure so the mechanical
+          and electrical designs could evolve independently.
+        </p>
+      </section>
+
+      <section class="project-section">
+        <h2>Firmware</h2>
+        <p>
+          The firmware is C running under the Arduino core for the 32U4 — I
+          chose that over a bare-metal toolchain specifically because the
+          Arduino core's USB HID stack is well-tested, which meant I could
+          focus on the matrix scanning logic and the host-side mapping rather
+          than reimplementing HID descriptors.
+        </p>
+
+        <h3>Matrix scan loop</h3>
+        <p>
+          The scan loop drives one row low at a time, waits briefly for the
+          column lines to settle, and reads all five columns. A key is
+          considered pressed when its column reads low while its row is
+          being driven. After scanning all four rows, I apply a 50 ms
+          debounce per key — a key state change only registers if the new
+          state has been stable for the full debounce window. That rejects
+          mechanical bounce without adding perceivable latency.
+        </p>
+
+        <h3>Serial diagnostics</h3>
+        <p>
+          Key press and release events get printed at 115200 baud over the
+          native USB serial port alongside the HID reports. That made
+          bring-up and debugging much faster: I could watch the matrix scan
+          in real time, verify that every key was wired correctly, and catch
+          layout errors (swapped row/column, open solder joints) without
+          needing an oscilloscope.
+        </p>
+      </section>
+
+      <section class="project-section">
+        <h2>Programming via Arduino-as-ISP</h2>
+        <p>
+          The board ships without a pre-flashed bootloader, so the first
+          flash has to go in over ISP. I set up a second Arduino as an ISP
+          programmer (the standard <code>ArduinoISP</code> sketch), wired
+          the 6-pin ISP header, and used <code>avrdude</code> through the
+          Arduino IDE to burn the bootloader and the initial firmware. After
+          that, subsequent updates go over the USB bootloader — much faster
+          for iterating.
+        </p>
+      </section>
+
+      <section class="project-section">
+        <h2>Deployment</h2>
+        <p>
+          The controller is currently in use for live robot control at ARUW.
+          It enumerates as a standard HID device on the operator station and
+          maps cleanly into the existing robot control software, which means
+          we can swap between the custom controller and a fallback keyboard
+          without reconfiguring anything upstream. Everything from the PCB to
+          the firmware is our own — which is the part I'm most proud of.
+        </p>
+      </section>
+
+      <section class="project-section">
+        <h2>What I'd do differently</h2>
+        <p>
+          I'd move the firmware off the Arduino core and onto a bare-metal
+          C or Rust setup next revision. The Arduino HID stack is fine, but
+          I've been bitten once by latency spikes I couldn't fully explain,
+          and having direct control over the USB endpoint scheduling would
+          let me guarantee input timing. I'd also add a second PCB revision
+          with per-key RGB so the operator can see mode state without
+          looking up at a screen.
+        </p>
+      </section>
+
+    </main>
+  </body>
+</html>
