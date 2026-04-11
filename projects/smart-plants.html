@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Smart Plants — Christopher Pattullo</title>
+    <meta
+      name="description"
+      content="Automated soil moisture monitoring and watering system built on ESP32 with FreeRTOS."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../styles.css" />
+  </head>
+  <body>
+
+    <nav class="sticky-nav" aria-label="Site navigation">
+      <a class="nav-back" href="../index.html">← Christopher Pattullo</a>
+      <ul class="nav-links">
+        <li><a href="../index.html#projects">Projects</a></li>
+        <li><a href="../index.html#experience">Experience</a></li>
+        <li><a href="../index.html#about">About</a></li>
+      </ul>
+    </nav>
+
+    <main class="page project-page">
+
+      <header class="project-hero">
+        <a class="project-back" href="../index.html#projects">← All projects</a>
+        <h1>Smart Plants</h1>
+        <p class="project-tagline">
+          Automated soil moisture monitoring with a relay-driven watering
+          system — ESP32, FreeRTOS, and capacitive sensing.
+        </p>
+        <div class="tags">
+          <span class="tag">C</span>
+          <span class="tag">FreeRTOS</span>
+          <span class="tag">ESP32</span>
+          <span class="tag">ADC</span>
+          <span class="tag">Embedded Systems</span>
+        </div>
+      </header>
+
+      <section class="project-section">
+        <h2>Overview</h2>
+        <p>
+          My plants kept dying because I'd forget to water them for a week
+          and then overwater them trying to compensate. The solution was a
+          system that measures soil moisture on a regular schedule and triggers
+          the pump when it's actually needed — not when I happen to remember.
+        </p>
+        <p>
+          The firmware runs on FreeRTOS, which gave me a natural way to
+          structure the periodic sensing, control logic, and any future display
+          or connectivity tasks as separate concurrent tasks with well-defined
+          priorities.
+        </p>
+      </section>
+
+      <section class="project-section">
+        <h2>How it works</h2>
+
+        <h3>Sensing</h3>
+        <p>
+          Soil moisture is measured with a capacitive sensor connected to the
+          ESP32's ADC. Capacitive sensors measure the dielectric constant of
+          the soil, which changes with water content — as opposed to resistive
+          sensors that pass current through the soil and corrode quickly. The
+          ADC reading is a 12-bit value that needs to be mapped to a meaningful
+          moisture percentage, which is where calibration comes in.
+        </p>
+
+        <h3>FreeRTOS task structure</h3>
+        <p>
+          The firmware is organized into three tasks. A timer task wakes on a
+          15-minute interval and signals the sensing task. The sensing task
+          takes an ADC reading, applies the calibration curve, and decides
+          whether to trigger the relay. A third task is reserved for a display
+          interface that's currently in progress.
+        </p>
+        <p>
+          Using FreeRTOS for what's essentially a simple loop might seem like
+          overkill, but it made adding features — like a future Wi-Fi task for
+          remote logging — straightforward without restructuring the whole
+          program.
+        </p>
+
+        <h3>Calibration</h3>
+        <p>
+          Capacitive moisture sensors drift significantly between batches, and
+          the relationship between ADC value and actual moisture percentage
+          depends on soil type. At startup, the firmware runs a two-point
+          calibration: it reads the sensor in dry air (0% moisture) and in a
+          water-saturated sample (100% moisture), stores those endpoints, and
+          uses linear interpolation for everything in between. This takes about
+          30 seconds and makes the readings meaningful regardless of sensor
+          or soil variation.
+        </p>
+      </section>
+
+      <div class="media-grid">
+        <figure class="media-slot">
+          <!-- replace with <img src="../img/plants-device.jpg" alt="Smart Plants device next to a plant"> -->
+          <div class="img-placeholder">[ device in use ]</div>
+          <figcaption>System deployed next to the plant</figcaption>
+        </figure>
+        <figure class="media-slot">
+          <!-- replace with <img src="../img/plants-sensor.jpg" alt="Soil moisture sensor in soil"> -->
+          <div class="img-placeholder">[ sensor in soil ]</div>
+          <figcaption>Capacitive sensor probes</figcaption>
+        </figure>
+        <figure class="media-slot">
+          <!-- replace with <img src="../img/plants-board.jpg" alt="ESP32 board with relay and sensor"> -->
+          <div class="img-placeholder">[ breadboard setup ]</div>
+          <figcaption>ESP32, relay module, and sensor</figcaption>
+        </figure>
+      </div>
+
+      <section class="project-section">
+        <h2>Key challenges</h2>
+        <p>
+          The biggest problem was ADC noise. The ESP32's internal ADC is
+          notoriously noisy, especially at the edges of its range (near 0V and
+          near 3.3V). Raw readings from the moisture sensor would swing by 50–100
+          counts between samples, which was enough to trigger false
+          watering events. I added a sliding window average over eight samples
+          and a hysteresis band around the watering threshold — the relay only
+          triggers when the smoothed reading drops below the threshold, and
+          only resets when it rises meaningfully above it.
+        </p>
+        <p>
+          Getting the relay timing right was also trickier than expected.
+          Running the pump for too long floods the pot; too short and the soil
+          barely registers the moisture increase before the next reading.
+          I ended up tuning the watering duration empirically per-plant based
+          on pot size and how quickly the reading recovers.
+        </p>
+      </section>
+
+      <section class="project-section">
+        <h2>What's next</h2>
+        <p>
+          I'm working on adding a small display that shows current moisture
+          level, last watering time, and next scheduled check. A Wi-Fi task
+          for logging readings to a simple dashboard would also be useful —
+          I want to see moisture trends over days to better understand how
+          different plants use water.
+        </p>
+      </section>
+
+      <section class="project-section">
+        <h2>What I'd do differently</h2>
+        <p>
+          I'd design a custom PCB from the start rather than building on a
+          development board. The development board wastes a lot of power
+          through its onboard voltage regulators and USB chip — a custom
+          board with deep sleep enabled could run on a small LiPo battery
+          for weeks per charge, making the system genuinely wireless.
+        </p>
+      </section>
+
+    </main>
+  </body>
+</html>

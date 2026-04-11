@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Viva — Christopher Pattullo</title>
+    <meta
+      name="description"
+      content="Technical lead for Viva, a mobile-first event invitation and RSVP platform."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../styles.css" />
+  </head>
+  <body>
+
+    <nav class="sticky-nav" aria-label="Site navigation">
+      <a class="nav-back" href="../index.html">← Christopher Pattullo</a>
+      <ul class="nav-links">
+        <li><a href="../index.html#projects">Projects</a></li>
+        <li><a href="../index.html#experience">Experience</a></li>
+        <li><a href="../index.html#about">About</a></li>
+      </ul>
+    </nav>
+
+    <main class="page project-page">
+
+      <header class="project-hero">
+        <a class="project-back" href="../index.html#projects">← All projects</a>
+        <h1>Viva — Event Platform</h1>
+        <p class="project-tagline">
+          Mobile-first event invitation and RSVP tracking platform. I lead
+          the technical team, drive architecture decisions, and stay hands-on
+          in the code.
+        </p>
+        <div class="tags">
+          <span class="tag">React</span>
+          <span class="tag">Node.js</span>
+          <span class="tag">PostgreSQL</span>
+          <span class="tag">TypeScript</span>
+          <span class="tag">Technical Lead</span>
+        </div>
+      </header>
+
+      <section class="project-section">
+        <h2>Overview</h2>
+        <p>
+          Viva is a startup building a better way to send event invitations —
+          the gap it's filling is between informal group chats (where RSVPs
+          get lost) and formal calendar invites (which feel stiff for social
+          events). The platform lets you create a styled invitation, share it
+          via a personalized link, and track RSVPs in real time.
+        </p>
+        <p>
+          I joined as technical lead, which means I'm responsible for the
+          architecture, the team's velocity, and making sure the thing
+          actually ships. We're a small team of four — three engineers and a
+          designer — so "lead" here means being in the code as much as I'm
+          in planning documents.
+        </p>
+      </section>
+
+      <section class="project-section">
+        <h2>Technical architecture</h2>
+
+        <h3>Frontend</h3>
+        <p>
+          The frontend is built in React with TypeScript. We chose React
+          because the team was familiar with it and the component model maps
+          well to the kind of card-based UI the app needs. State management
+          is kept simple — React context for auth, local state for most
+          UI, and React Query for server state. We've avoided adding Redux
+          because the app doesn't have the kind of complex cross-component
+          state that justifies it.
+        </p>
+
+        <h3>Backend</h3>
+        <p>
+          The API is a Node.js/Express server with TypeScript. Each endpoint
+          validates input against a Zod schema before it touches the database,
+          which has caught a number of subtle type mismatches between what the
+          frontend sends and what the backend expects. Authentication is
+          JWT-based with refresh token rotation.
+        </p>
+
+        <h3>Invitation-linking system</h3>
+        <p>
+          The core technical challenge is the invitation-linking system. Each
+          invitation generates a unique shareable URL tied to a specific event
+          and a specific recipient. When a recipient opens the link, the server
+          resolves their identity, pre-fills their RSVP form, and records the
+          visit. Getting this right required careful thought about how to
+          handle the case where the same person receives the invitation multiple
+          times or shares their link with someone else.
+        </p>
+      </section>
+
+      <div class="media-grid media-grid--3">
+        <figure class="media-slot">
+          <!-- replace with <img src="../img/viva-home.jpg" alt="Viva app home screen"> -->
+          <div class="img-placeholder">[ home screen ]</div>
+          <figcaption>Home screen</figcaption>
+        </figure>
+        <figure class="media-slot">
+          <!-- replace with <img src="../img/viva-invite.jpg" alt="Event invitation view"> -->
+          <div class="img-placeholder">[ invitation view ]</div>
+          <figcaption>Event invitation</figcaption>
+        </figure>
+        <figure class="media-slot">
+          <!-- replace with <img src="../img/viva-rsvp.jpg" alt="RSVP tracking dashboard"> -->
+          <div class="img-placeholder">[ RSVP dashboard ]</div>
+          <figcaption>RSVP tracking</figcaption>
+        </figure>
+      </div>
+
+      <section class="project-section">
+        <h2>The lead role</h2>
+        <p>
+          Technical leadership on a small team is different from what I
+          expected. The most important thing isn't the architecture decisions —
+          it's keeping everyone unblocked. A teammate stuck on a problem for
+          a day costs more than making a suboptimal tech choice that you can
+          refactor later. I've learned to prioritize synchronous debugging
+          sessions over async code review comments when someone is stuck.
+        </p>
+        <p>
+          Code review has been a useful teaching tool. Rather than just
+          approving or requesting changes, I try to explain the reasoning
+          behind each comment — not "change this" but "change this because..."
+          It's slower in the short term but the team makes fewer of the same
+          mistakes on subsequent PRs.
+        </p>
+      </section>
+
+      <section class="project-section">
+        <h2>Key challenges</h2>
+        <p>
+          The hardest ongoing challenge is scope. There's always more to build
+          — more invitation templates, more RSVP question types, event
+          reminders, calendar sync — and all of it sounds valuable. Keeping the
+          team focused on the features that actually matter for the core use
+          case, rather than building a Swiss Army knife that does nothing
+          particularly well, requires saying no frequently and having clear
+          reasoning for it.
+        </p>
+      </section>
+
+      <section class="project-section">
+        <h2>What I'd do differently</h2>
+        <p>
+          I'd write an end-to-end test suite earlier. We've caught several
+          regressions in the invitation-linking flow only after they reached
+          staging, because unit tests for individual functions don't cover
+          the full user journey. A Playwright suite for the critical paths
+          would have caught these earlier and made refactoring much less
+          nerve-wracking.
+        </p>
+      </section>
+
+    </main>
+  </body>
+</html>

@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Desktop Reminder Buddy — Christopher Pattullo</title>
+    <meta
+      name="description"
+      content="A physical ambient calendar display built on ESP32 with C firmware, I²C display, and a Python host script over UART."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../styles.css" />
+  </head>
+  <body>
+
+    <nav class="sticky-nav" aria-label="Site navigation">
+      <a class="nav-back" href="../index.html">← Christopher Pattullo</a>
+      <ul class="nav-links">
+        <li><a href="../index.html#projects">Projects</a></li>
+        <li><a href="../index.html#experience">Experience</a></li>
+        <li><a href="../index.html#about">About</a></li>
+      </ul>
+    </nav>
+
+    <main class="page project-page">
+
+      <header class="project-hero">
+        <a class="project-back" href="../index.html#projects">← All projects</a>
+        <h1>Desktop Reminder Buddy</h1>
+        <p class="project-tagline">
+          A small physical device that pulls your calendar onto a display
+          sitting next to your monitor — less intrusive than a phone
+          notification, always visible.
+        </p>
+        <div class="tags">
+          <span class="tag">C</span>
+          <span class="tag">ESP32</span>
+          <span class="tag">FreeRTOS</span>
+          <span class="tag">I²C</span>
+          <span class="tag">UART</span>
+          <span class="tag">Python</span>
+        </div>
+      </header>
+
+      <section class="project-section">
+        <h2>Overview</h2>
+        <p>
+          I kept missing calendar events because I'd dismiss phone
+          notifications and forget them. The goal was something ambient —
+          always on, always visible, passive. A small display next to the
+          monitor that showed the next one or two events without requiring any
+          interaction.
+        </p>
+        <p>
+          The hardware is an ESP32 development board driving a small OLED over
+          I²C. A Python script runs on the host machine, queries Google
+          Calendar, and sends formatted event data over UART to the
+          microcontroller. The firmware parses the incoming data and decides
+          what to show.
+        </p>
+      </section>
+
+      <section class="project-section">
+        <h2>How it works</h2>
+
+        <h3>Host-side Python script</h3>
+        <p>
+          The Python script uses the Google Calendar API to fetch upcoming
+          events, filters them down to what's relevant (next 24 hours,
+          ignoring all-day events), formats the data into a compact serial
+          protocol, and sends it over a virtual COM port to the ESP32. It runs
+          on a polling interval so the display stays current.
+        </p>
+
+        <h3>Firmware: UART ingestion and parsing</h3>
+        <p>
+          The firmware's main job is receiving the serial data and rendering
+          it on the display. I wrote a custom parser that handles
+          variable-length strings, enforces a maximum display width per line
+          (the OLED is 128px wide at our font size, which limits you to around
+          16 characters), and truncates gracefully with an ellipsis rather
+          than cutting mid-word. Getting that last bit right — truncating at
+          word boundaries — was fussier than expected.
+        </p>
+
+        <h3>Display rendering via I²C</h3>
+        <p>
+          The OLED is driven over I²C using the SSD1306 controller. I used an
+          ESP-IDF I²C driver directly rather than an Arduino library, which
+          gave me more control over the transaction timing but required reading
+          the controller datasheet more carefully. The display shows the event
+          name on line one, the time on line two, and a progress bar indicating
+          how far through the current event you are.
+        </p>
+      </section>
+
+      <div class="media-grid">
+        <figure class="media-slot">
+          <!-- replace with <img src="../img/reminder-device.jpg" alt="Finished device on desk"> -->
+          <div class="img-placeholder">[ finished device ]</div>
+          <figcaption>On the desk</figcaption>
+        </figure>
+        <figure class="media-slot">
+          <!-- replace with <img src="../img/reminder-display.jpg" alt="OLED display showing calendar event"> -->
+          <div class="img-placeholder">[ OLED display ]</div>
+          <figcaption>Display showing upcoming event</figcaption>
+        </figure>
+        <figure class="media-slot">
+          <!-- replace with <img src="../img/reminder-board.jpg" alt="ESP32 board and wiring"> -->
+          <div class="img-placeholder">[ ESP32 board ]</div>
+          <figcaption>ESP32 and display wiring</figcaption>
+        </figure>
+      </div>
+
+      <section class="project-section">
+        <h2>Key challenges</h2>
+        <p>
+          The trickiest part was the serial protocol design. I wanted the
+          firmware to be robust to partial or corrupted transmissions, which
+          meant building in a simple framing scheme (start/end markers) and
+          a checksum. Early versions would occasionally display garbage when
+          the Python script sent data while the microcontroller was in the
+          middle of a display refresh cycle, causing the UART buffer to
+          overflow. Adding a dedicated receive task and a small ring buffer
+          fixed the timing issue.
+        </p>
+        <p>
+          I also spent more time than expected on font rendering. The default
+          monospace font at the size I wanted made the display feel cramped,
+          so I generated a custom bitmap font that uses slightly more vertical
+          space but is more readable at arm's length.
+        </p>
+      </section>
+
+      <section class="project-section">
+        <h2>Outcome and next steps</h2>
+        <p>
+          The device has been sitting on my desk for months and actually gets
+          used. The ambient nature of it — no interaction required — is the
+          key thing that makes it useful day-to-day.
+        </p>
+        <p>
+          The obvious next step is cutting the USB cable. I prototyped a Wi-Fi
+          path where the ESP32 queries the calendar API directly using its
+          built-in Wi-Fi, which would make the device fully standalone. The
+          main obstacle is OAuth token management on a microcontroller with no
+          secure storage — I'm still thinking through the right way to handle
+          credential persistence without compromising the token.
+        </p>
+      </section>
+
+      <section class="project-section">
+        <h2>What I'd do differently</h2>
+        <p>
+          I'd design a proper enclosure from the start rather than leaving it
+          as a bare PCB. The wiring is messy and the display floats loose.
+          A 3D-printed case with a recessed display window and a clean cable
+          exit would make it feel like an actual product rather than a
+          prototype.
+        </p>
+      </section>
+
+    </main>
+  </body>
+</html>

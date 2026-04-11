@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>WireBend-Kit — Christopher Pattullo</title>
+    <meta
+      name="description"
+      content="Adding closed-loop angle feedback to a wire-bending research machine at the UW Programmable Matter Lab."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../styles.css" />
+  </head>
+  <body>
+
+    <nav class="sticky-nav" aria-label="Site navigation">
+      <a class="nav-back" href="../index.html">← Christopher Pattullo</a>
+      <ul class="nav-links">
+        <li><a href="../index.html#projects">Projects</a></li>
+        <li><a href="../index.html#research">Research</a></li>
+        <li><a href="../index.html#about">About</a></li>
+      </ul>
+    </nav>
+
+    <main class="page project-page">
+
+      <header class="project-hero">
+        <a class="project-back" href="../index.html#projects">← All projects</a>
+        <h1>WireBend-Kit — Angle Feedback</h1>
+        <p class="project-tagline">
+          Closing the loop on a wire-bending fabrication machine by adding
+          electronic angle sensing and a correction pass — turning an
+          open-loop machine into a repeatable tool.
+        </p>
+        <div class="tags">
+          <span class="tag">Python</span>
+          <span class="tag">Embedded C</span>
+          <span class="tag">Control Systems</span>
+          <span class="tag">Research</span>
+          <span class="tag">Programmable Matter Lab</span>
+        </div>
+      </header>
+
+      <section class="project-section">
+        <h2>Context</h2>
+        <p>
+          WireBend-Kit is a research machine built at the UW Programmable
+          Matter Lab (advisor: Professor Martin Nisser) that automatically
+          bends wire into 3D shapes from a digital design. A user specifies
+          a sequence of bend angles, and the machine actuates the wire through
+          a series of forming passes.
+        </p>
+        <p>
+          The problem when I joined the project was repeatability. Metal wire
+          springs back after bending — the "springback" angle depends on
+          material properties, work-hardening from previous bends, and slight
+          variations in wire diameter. The machine was issuing commands based
+          on a fixed kinematic model, but the actual output angles drifted,
+          and errors accumulated across a sequence of bends.
+        </p>
+      </section>
+
+      <section class="project-section">
+        <h2>The feedback system</h2>
+
+        <h3>Sensing</h3>
+        <p>
+          I added electronic angle sensing at the bend point. The sensor reads
+          the actual bend angle after each actuation. The key challenge in
+          sensing is that the wire is under mechanical stress and the sensing
+          geometry changes as the wire deforms, so I needed a sensor placement
+          and design that remained reliable across the full range of bend angles
+          the machine produces.
+        </p>
+
+        <h3>Control loop</h3>
+        <p>
+          After each bend, the firmware reads the sensor, computes the error
+          between the target angle and the measured angle, and decides whether
+          to command a correction pass. This is a simple proportional correction
+          — not a full PID controller, because the actuator dynamics are slow
+          enough that integral and derivative terms didn't meaningfully improve
+          response. The correction logic had to account for the fact that
+          overbending and then correcting back introduces more work-hardening
+          than getting it right the first time, so the correction magnitude is
+          deliberately conservative.
+        </p>
+
+        <h3>Firmware consolidation</h3>
+        <p>
+          The original machine split its control across multiple
+          microcontrollers, which made it difficult to reason about timing and
+          added latency between the sensing and actuation steps. I refactored
+          the firmware to run on a single controller, which simplified the
+          architecture considerably and reduced the feedback loop latency.
+        </p>
+      </section>
+
+      <div class="media-grid">
+        <figure class="media-slot">
+          <!-- replace with <img src="../img/wirebend-machine.jpg" alt="WireBend-Kit machine"> -->
+          <div class="img-placeholder">[ WireBend-Kit machine ]</div>
+          <figcaption>The WireBend-Kit machine</figcaption>
+        </figure>
+        <figure class="media-slot">
+          <!-- replace with <img src="../img/wirebend-sensor.jpg" alt="Angle sensing setup"> -->
+          <div class="img-placeholder">[ angle sensor ]</div>
+          <figcaption>Electronic angle sensing at the bend point</figcaption>
+        </figure>
+        <figure class="media-slot">
+          <!-- replace with <img src="../img/wirebend-output.jpg" alt="Wire bent to target shape"> -->
+          <div class="img-placeholder">[ bent wire sample ]</div>
+          <figcaption>Output accuracy with closed-loop correction</figcaption>
+        </figure>
+        <figure class="media-slot">
+          <!-- replace with <img src="../img/wirebend-gui.jpg" alt="Python GUI control panel"> -->
+          <div class="img-placeholder">[ Python GUI ]</div>
+          <figcaption>Control panel GUI</figcaption>
+        </figure>
+      </div>
+
+      <section class="project-section">
+        <h2>Python GUI and tooling</h2>
+        <p>
+          The machine is controlled through a Python GUI that I rewrote to
+          make iterative testing faster. The old interface required navigating
+          through multiple screens to issue a single bend command; the new one
+          surfaces the most common operations on the main panel and adds a
+          single-command mode where you can quickly test a specific angle
+          without building a full sequence. This made it much faster to
+          characterize how the machine behaved at different angles and
+          materials.
+        </p>
+      </section>
+
+      <section class="project-section">
+        <h2>Key challenges</h2>
+        <p>
+          The trickiest part was characterizing the springback behavior. Metal
+          wire doesn't spring back the same amount every time — the amount
+          depends on how much the wire has already been worked. An
+          over-corrected bend followed by a reverse correction adds
+          more hardening than a single accurate bend, and the accumulated error
+          changes the springback coefficient for future bends in the sequence.
+          Getting the correction logic right required building a model of how
+          springback evolves across a sequence rather than treating each bend
+          independently.
+        </p>
+      </section>
+
+      <section class="project-section">
+        <h2>What I'd do differently</h2>
+        <p>
+          I'd invest more time in modeling the material behavior up front
+          rather than tuning the correction gain empirically. A proper
+          material characterization — measuring springback as a function of
+          bend angle and prior work history — would let the controller adapt
+          automatically to different wire types without manual re-tuning.
+        </p>
+      </section>
+
+    </main>
+  </body>
+</html>

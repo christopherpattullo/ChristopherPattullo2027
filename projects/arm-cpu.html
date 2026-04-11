@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Pipelined ARM CPU — Christopher Pattullo</title>
+    <meta
+      name="description"
+      content="A five-stage pipelined ARM processor built from scratch in Verilog and synthesized on FPGA."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../styles.css" />
+  </head>
+  <body>
+
+    <nav class="sticky-nav" aria-label="Site navigation">
+      <a class="nav-back" href="../index.html">← Christopher Pattullo</a>
+      <ul class="nav-links">
+        <li><a href="../index.html#projects">Projects</a></li>
+        <li><a href="../index.html#experience">Experience</a></li>
+        <li><a href="../index.html#about">About</a></li>
+      </ul>
+    </nav>
+
+    <main class="page project-page">
+
+      <header class="project-hero">
+        <a class="project-back" href="../index.html#projects">← All projects</a>
+        <h1>Pipelined ARM CPU</h1>
+        <p class="project-tagline">
+          A five-stage pipelined ARM processor built from scratch in Verilog,
+          with hazard detection, data forwarding, and a branch predictor —
+          synthesized and tested on FPGA.
+        </p>
+        <div class="tags">
+          <span class="tag">Verilog</span>
+          <span class="tag">FPGA</span>
+          <span class="tag">Quartus</span>
+          <span class="tag">ARM Architecture</span>
+          <span class="tag">Digital Design</span>
+        </div>
+      </header>
+
+      <section class="project-section">
+        <h2>Overview</h2>
+        <p>
+          This was a computer architecture project where I implemented an ARM
+          processor pipeline entirely in Verilog — not using any IP blocks,
+          just hand-written RTL from the instruction fetch stage through to
+          writeback. The goal was to go beyond a single-cycle or multi-cycle
+          design and actually deal with the real problems that make pipelining
+          hard: data hazards, control hazards, and the forwarding logic that
+          lets you avoid stalling on every dependency.
+        </p>
+        <p>
+          I synthesized it onto an FPGA using Quartus and verified behavior
+          against a known-good reference, using simulation waveforms throughout
+          to track what was happening in each pipeline stage on each clock
+          cycle.
+        </p>
+      </section>
+
+      <section class="project-section">
+        <h2>How it works</h2>
+
+        <h3>Pipeline stages</h3>
+        <p>
+          The processor has five stages: Fetch, Decode, Execute, Memory, and
+          Writeback. Each stage is separated by pipeline registers that latch
+          the relevant signals at each clock edge. Instructions move through
+          the pipeline one stage per cycle, so in steady state you have five
+          instructions in-flight simultaneously.
+        </p>
+
+        <h3>Hazard detection and forwarding</h3>
+        <p>
+          The hazard detection unit watches the register read and write ports
+          across adjacent pipeline stages. When it detects that an instruction
+          in Decode needs a value that an earlier instruction in Execute or
+          Memory hasn't written back yet, it has two choices: stall (insert
+          a bubble and wait), or forward (route the not-yet-written result
+          directly to the Execute stage input). Forwarding covers most cases;
+          stalling is reserved for load-use hazards where the value genuinely
+          isn't computed yet.
+        </p>
+
+        <h3>Branch predictor</h3>
+        <p>
+          Control hazards are trickier because by the time you know a branch
+          is taken, you've already fetched two instructions that shouldn't
+          execute. I implemented a simple static predictor (predict not taken)
+          with logic to flush the incorrectly fetched instructions from the
+          pipeline when a branch resolves as taken in the Execute stage.
+        </p>
+      </section>
+
+      <section class="project-section">
+        <h2>Key challenges</h2>
+        <p>
+          The hardest part was load-use hazard handling. A load instruction
+          doesn't produce its result until the end of the Memory stage, so a
+          dependent instruction immediately after it can't be forwarded to —
+          the data simply isn't there yet. Getting the stall logic right
+          required carefully gating the PC increment and pipeline register
+          enables, and I had several bugs where the pipeline would advance
+          one stage too many or too few before freezing.
+        </p>
+        <p>
+          Debugging entirely through simulation waveforms taught me to be
+          systematic: I built a small test program that exercised each hazard
+          type in isolation, verified the output matched expected register
+          values, and only then moved to more complex sequences. Staring at
+          a wall of waveform signals for an hour because of an off-by-one in
+          a forwarding mux made the lesson stick.
+        </p>
+      </section>
+
+      <div class="media-grid">
+        <figure class="media-slot">
+          <!-- replace with <img src="../img/arm-cpu-waveform.jpg" alt="Simulation waveform showing pipeline stages"> -->
+          <div class="img-placeholder">[ simulation waveform ]</div>
+          <figcaption>Pipeline stage simulation</figcaption>
+        </figure>
+        <figure class="media-slot">
+          <!-- replace with <img src="../img/arm-cpu-fpga.jpg" alt="FPGA board running the ARM CPU"> -->
+          <div class="img-placeholder">[ FPGA board ]</div>
+          <figcaption>Running on FPGA</figcaption>
+        </figure>
+        <figure class="media-slot">
+          <!-- replace with <img src="../img/arm-cpu-schematic.jpg" alt="Pipeline block diagram"> -->
+          <div class="img-placeholder">[ pipeline diagram ]</div>
+          <figcaption>Pipeline block diagram</figcaption>
+        </figure>
+        <figure class="media-slot">
+          <!-- replace with <img src="../img/arm-cpu-quartus.jpg" alt="Quartus synthesis report"> -->
+          <div class="img-placeholder">[ Quartus synthesis ]</div>
+          <figcaption>Synthesis and timing report</figcaption>
+        </figure>
+      </div>
+
+      <section class="project-section">
+        <h2>Outcome</h2>
+        <p>
+          The final processor correctly executes a suite of ARM assembly
+          programs including arithmetic sequences, memory load-store chains,
+          and branch-heavy loops. Synthesis in Quartus fit comfortably on the
+          target FPGA with timing closure achieved at the target frequency.
+        </p>
+        <p>
+          More than the result, this project changed how I read processor
+          datasheets. Pipeline stage latencies, forwarding paths, and branch
+          misprediction penalties stopped being abstract specs and became
+          things I understood from having implemented them.
+        </p>
+      </section>
+
+      <section class="project-section">
+        <h2>What I'd do differently</h2>
+        <p>
+          The branch predictor is naive — predict-not-taken works fine for
+          small loops but falls apart for larger programs with backward
+          branches that are almost always taken. A two-bit saturating counter
+          predictor with a branch target buffer would be a natural next step
+          and isn't that much more complex to implement. I'd also write a more
+          comprehensive automated test harness rather than manually inspecting
+          waveforms.
+        </p>
+      </section>
+
+    </main>
+  </body>
+</html>

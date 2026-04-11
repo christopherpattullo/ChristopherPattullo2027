@@ -1,0 +1,866 @@
+/* ============================================================
+   Tokens
+   ============================================================ */
+:root {
+  --bg:           #faf9f5;
+  --surface:      #f5f3eb;
+  --surface-alt:  #f0ede2;
+  --border:       #e7e3d6;
+  --border-mid:   #d4cfc0;
+  --text:         #1f1e1d;
+  --text-body:    #2c2b29;
+  --muted:        #6b675f;
+
+  /* Primary accent — copper */
+  --accent:       #c96442;
+  --accent-soft:  #d97757;
+  --accent-ink:   #8f4226;   /* darker copper for text */
+  --accent-tint:  #fbeee6;   /* very soft copper bg */
+  --accent-edge:  #f0d7c7;   /* soft copper border */
+
+  /* Secondary — sage */
+  --sage:         #6b8e7f;
+  --sage-ink:     #4d6d5e;
+  --sage-tint:    #eef3ef;
+  --sage-edge:    #d6e0d9;
+
+  /* Tertiary — warm gold */
+  --gold:         #c89b5a;
+  --gold-ink:     #8c6a2a;
+  --gold-tint:    #faf2e0;
+  --gold-edge:    #ead7b5;
+
+  /* Quaternary — dusty plum */
+  --plum:         #8a5b7a;
+  --plum-ink:     #6b3f5b;
+  --plum-tint:    #f4ecf1;
+  --plum-edge:    #dec7d6;
+
+  --card-bg:      #ffffff;
+  --max-width:    760px;
+  --radius:       10px;
+  --nav-h:        52px;
+}
+
+/* Thin rainbow stripe along the very top of the page */
+body::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(
+    90deg,
+    var(--accent) 0%,
+    var(--gold) 33%,
+    var(--sage) 66%,
+    var(--plum) 100%
+  );
+  z-index: 200;
+  pointer-events: none;
+}
+
+/* ============================================================
+   Reset & Base
+   ============================================================ */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  /* offset anchor targets so sticky nav doesn't cover them */
+  scroll-padding-top: calc(var(--nav-h) + 16px);
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
+  font-size: 16px;
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+figure {
+  margin: 0;
+}
+
+/* Real images inside any figure fill the slot cleanly */
+figure img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Ensure card media slots have a definite height so object-fit works */
+.card-media img          { min-height: 160px; max-height: 260px; }
+.card-media--featured img { min-height: 240px; height: 100%; }
+.photo-slot img          { min-height: 210px; aspect-ratio: 4 / 3; }
+
+/* ============================================================
+   Links
+   ============================================================ */
+a {
+  color: var(--accent);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: color 120ms ease, border-color 120ms ease;
+}
+
+a:hover {
+  color: var(--accent-soft);
+  border-bottom-color: currentColor;
+}
+
+/* ============================================================
+   Sticky Nav
+   ============================================================ */
+.sticky-nav {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  height: var(--nav-h);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 28px;
+  background: rgba(250, 249, 245, 0.85);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--border);
+}
+
+.nav-name {
+  font-size: 0.88rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--text);
+}
+
+.nav-links {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  gap: 24px;
+}
+
+.nav-links a {
+  font-size: 0.78rem;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+  border-bottom: none;
+  transition: color 120ms ease;
+}
+
+.nav-links a:hover {
+  color: var(--accent);
+  border-bottom: none;
+}
+
+/* ============================================================
+   Page Container
+   ============================================================ */
+.page {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 72px 28px 100px;
+}
+
+/* ============================================================
+   Hero
+   ============================================================ */
+.hero {
+  margin-bottom: 72px;
+}
+
+.hero h1 {
+  font-family: "Fraunces", Georgia, "Times New Roman", serif;
+  font-weight: 500;
+  font-size: clamp(2.4rem, 5vw, 3.2rem);
+  letter-spacing: -0.015em;
+  line-height: 1.05;
+  margin: 0 0 18px;
+  /* subtle warm gradient — copper to plum */
+  background: linear-gradient(
+    135deg,
+    var(--accent) 0%,
+    #b25438 40%,
+    var(--plum) 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.tagline {
+  font-size: 1.075rem;
+  color: var(--muted);
+  max-width: 56ch;
+  margin: 0 0 22px;
+  line-height: 1.6;
+}
+
+.links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+  align-items: center;
+  font-size: 0.95rem;
+  color: var(--muted);
+}
+
+.links a {
+  color: var(--text);
+  border-bottom: none;
+}
+
+.links a:hover {
+  color: var(--accent);
+  border-bottom: none;
+}
+
+/* ============================================================
+   Sections — hover lift effect
+   ============================================================ */
+.section {
+  margin: 0 0 52px;
+  padding: 0;
+}
+
+.section h2 {
+  position: relative;
+  font-family: "Fraunces", Georgia, serif;
+  font-weight: 500;
+  font-size: 1.4rem;
+  letter-spacing: -0.01em;
+  margin: 0 0 24px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+/* Colored accent stub under each h2 */
+.section h2::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -1.5px;
+  width: 44px;
+  height: 2.5px;
+  border-radius: 2px;
+  background: var(--accent);
+  transition: width 240ms ease;
+}
+
+.section:hover h2::after {
+  width: 72px;
+}
+
+/* Each section gets its own accent color under the h2 */
+#research h2::after,
+#skills h2::after       { background: var(--sage); }
+#projects h2::after,
+#photography h2::after  { background: var(--gold); }
+#education h2::after,
+#outside h2::after      { background: var(--plum); }
+
+.section-lead {
+  margin: 0 0 20px;
+  color: var(--muted);
+  max-width: 62ch;
+}
+
+.section > p:not(.section-lead) {
+  margin: 0;
+  max-width: 64ch;
+  color: var(--text-body);
+}
+
+/* ============================================================
+   Entries (Research / Experience prose)
+   ============================================================ */
+.entry {
+  margin-bottom: 36px;
+}
+
+.entry:last-child {
+  margin-bottom: 0;
+}
+
+.entry-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 16px;
+  margin-bottom: 10px;
+}
+
+.entry-head h3 {
+  font-size: 1.02rem;
+  font-weight: 600;
+  margin: 0;
+  letter-spacing: -0.005em;
+}
+
+.org {
+  margin: 3px 0 0;
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+
+.when {
+  flex-shrink: 0;
+  margin: 0;
+  background: var(--accent-tint);
+  color: var(--accent-ink);
+  font-size: 0.78rem;
+  font-weight: 500;
+  white-space: nowrap;
+  padding: 3px 11px;
+  border-radius: 14px;
+  border: 1px solid var(--accent-edge);
+}
+
+/* Vary the date pill color per section to match the h2 accent */
+#research .when,
+#skills .when        { background: var(--sage-tint); color: var(--sage-ink); border-color: var(--sage-edge); }
+#projects .when,
+#photography .when   { background: var(--gold-tint); color: var(--gold-ink); border-color: var(--gold-edge); }
+#education .when,
+#outside .when       { background: var(--plum-tint); color: var(--plum-ink); border-color: var(--plum-edge); }
+
+.blurb {
+  margin: 0;
+  color: var(--text-body);
+  line-height: 1.72;
+}
+
+.coursework {
+  margin: 6px 0 0;
+  color: var(--muted);
+  font-size: 0.93rem;
+  line-height: 1.7;
+}
+
+/* ============================================================
+   Image Placeholder
+   ============================================================ */
+.img-placeholder {
+  width: 100%;
+  height: 100%;
+  min-height: 180px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--surface);
+  border: 1.5px dashed var(--border-mid);
+  color: var(--muted);
+  font-size: 0.8rem;
+  letter-spacing: 0.05em;
+  transition: background 200ms ease, border-color 200ms ease;
+  cursor: default;
+  user-select: none;
+}
+
+/* ============================================================
+   Cards — shared base
+   ============================================================ */
+.card {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  transition: transform 220ms ease, box-shadow 220ms ease,
+              border-color 220ms ease;
+}
+
+.card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 36px rgba(0, 0, 0, 0.09);
+  border-color: var(--accent);
+}
+
+.card:hover .img-placeholder {
+  background: #f8ede7;
+  border-color: var(--accent-soft);
+}
+
+.card-body {
+  padding: 20px 22px 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.card-body h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0;
+  letter-spacing: -0.005em;
+}
+
+.card-body .blurb {
+  font-size: 0.91rem;
+  line-height: 1.62;
+  margin: 0;
+}
+
+/* ============================================================
+   Featured Cards (image-left, text-right)
+   ============================================================ */
+.featured-projects {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  margin-bottom: 24px;
+}
+
+.card--featured {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+}
+
+.card-media--featured {
+  /* fill the left column fully */
+  align-self: stretch;
+}
+
+.card-media--featured .img-placeholder {
+  min-height: 240px;
+  height: 100%;
+  border-radius: 0;
+  border-top: none;
+  border-left: none;
+  border-bottom: none;
+  border-right: 1.5px dashed var(--border-mid);
+}
+
+.card--featured:hover .card-media--featured .img-placeholder {
+  border-right-color: var(--accent-soft);
+}
+
+/* ============================================================
+   Standard Cards (image-top, text-below) — 3-column grid
+   ============================================================ */
+.project-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+}
+
+.card--standard .card-media .img-placeholder {
+  min-height: 160px;
+  border-radius: 0;
+  border-top: none;
+  border-left: none;
+  border-right: none;
+  border-bottom: 1.5px dashed var(--border-mid);
+}
+
+.card--standard:hover .card-media .img-placeholder {
+  border-bottom-color: var(--accent-soft);
+}
+
+/* Placeholder cards */
+.card--placeholder {
+  opacity: 0.45;
+  pointer-events: none; /* don't show hover on empty placeholders */
+}
+
+/* ============================================================
+   Tag Pills
+   ============================================================ */
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.tag {
+  font-size: 0.73rem;
+  font-weight: 500;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 2.5px 11px;
+  white-space: nowrap;
+  background: var(--surface);
+  color: var(--muted);
+  transition: transform 160ms ease;
+}
+
+/* 4-color cycling so each card's tags feel varied */
+.tags .tag:nth-child(4n+1) {
+  background: var(--accent-tint);
+  border-color: var(--accent-edge);
+  color: var(--accent-ink);
+}
+.tags .tag:nth-child(4n+2) {
+  background: var(--sage-tint);
+  border-color: var(--sage-edge);
+  color: var(--sage-ink);
+}
+.tags .tag:nth-child(4n+3) {
+  background: var(--gold-tint);
+  border-color: var(--gold-edge);
+  color: var(--gold-ink);
+}
+.tags .tag:nth-child(4n) {
+  background: var(--plum-tint);
+  border-color: var(--plum-edge);
+  color: var(--plum-ink);
+}
+
+.card:hover .tag {
+  transform: translateY(-1px);
+}
+
+/* ============================================================
+   Skills Grid
+   ============================================================ */
+.skill-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+.skill-grid > div {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left-width: 3px;
+  border-radius: var(--radius);
+  padding: 16px 18px;
+}
+
+.skill-grid > div:nth-child(1) { border-left-color: var(--accent); }
+.skill-grid > div:nth-child(2) { border-left-color: var(--sage); }
+.skill-grid > div:nth-child(3) { border-left-color: var(--gold); }
+
+.skill-grid h4 {
+  margin: 0 0 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--muted);
+}
+
+.skill-grid p {
+  margin: 0;
+  font-size: 0.93rem;
+  line-height: 1.55;
+  color: var(--text-body);
+}
+
+/* ============================================================
+   Photo Grid
+   ============================================================ */
+.photo-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.photo-slot {
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.photo-slot .img-placeholder {
+  min-height: 210px;
+  border-radius: 0;
+}
+
+.photo-slot figcaption {
+  padding: 6px 4px 0;
+  font-size: 0.82rem;
+  color: var(--muted);
+  min-height: 22px;
+  line-height: 1.4;
+}
+
+/* ============================================================
+   Card Stretched Link
+   (h3 inside card-body has .card-link; ::after covers whole card)
+   ============================================================ */
+.card {
+  position: relative;
+}
+
+.card-link {
+  color: inherit;
+  border-bottom: none;
+}
+
+.card-link:hover {
+  color: var(--accent);
+  border-bottom: none;
+}
+
+.card-link::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+}
+
+/* ============================================================
+   Project Detail Pages
+   ============================================================ */
+.nav-back {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--text);
+  border-bottom: none;
+  letter-spacing: -0.01em;
+}
+
+.nav-back:hover {
+  color: var(--accent);
+  border-bottom: none;
+}
+
+.project-page {
+  padding-top: 56px;
+}
+
+.project-hero {
+  margin-bottom: 56px;
+}
+
+.project-back {
+  display: inline-block;
+  margin-bottom: 20px;
+  font-size: 0.88rem;
+  color: var(--muted);
+  border-bottom: none;
+  transition: color 120ms ease;
+}
+
+.project-back:hover {
+  color: var(--accent);
+  border-bottom: none;
+}
+
+.project-hero h1 {
+  font-family: "Fraunces", Georgia, serif;
+  font-weight: 500;
+  font-size: clamp(2rem, 4.5vw, 2.8rem);
+  letter-spacing: -0.015em;
+  line-height: 1.08;
+  margin: 0 0 14px;
+}
+
+.project-tagline {
+  font-size: 1.05rem;
+  color: var(--muted);
+  margin: 0 0 20px;
+  max-width: 58ch;
+  line-height: 1.6;
+}
+
+.project-section {
+  margin-bottom: 48px;
+}
+
+.project-section h2 {
+  font-family: "Fraunces", Georgia, serif;
+  font-weight: 500;
+  font-size: 1.25rem;
+  letter-spacing: -0.01em;
+  margin: 0 0 16px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+}
+
+.project-section p {
+  color: var(--text-body);
+  line-height: 1.72;
+  margin: 0 0 14px;
+  max-width: 66ch;
+}
+
+.project-section p:last-child {
+  margin-bottom: 0;
+}
+
+.project-section h3 {
+  font-size: 0.95rem;
+  font-weight: 600;
+  margin: 24px 0 6px;
+  letter-spacing: -0.003em;
+}
+
+/* Two-column media grid for project photos */
+.media-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+  margin: 32px 0;
+}
+
+.media-grid.media-grid--3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.media-slot {
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.media-slot .img-placeholder {
+  min-height: 220px;
+  border-radius: 0;
+}
+
+.media-slot figcaption {
+  padding: 6px 4px 0;
+  font-size: 0.82rem;
+  color: var(--muted);
+  line-height: 1.4;
+  min-height: 20px;
+}
+
+/* Inline code / spec callouts */
+.spec-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.spec-list li {
+  display: flex;
+  gap: 12px;
+  font-size: 0.93rem;
+  line-height: 1.5;
+}
+
+.spec-list li::before {
+  content: "—";
+  color: var(--accent);
+  flex-shrink: 0;
+}
+
+@media (max-width: 520px) {
+  .media-grid,
+  .media-grid.media-grid--3 {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ============================================================
+   Footer
+   ============================================================ */
+.footer {
+  margin-top: 80px;
+  padding-top: 24px;
+  border-top: 1px solid var(--border);
+  text-align: center;
+}
+
+.footer p {
+  margin: 0 0 4px;
+}
+
+/* ============================================================
+   Utilities
+   ============================================================ */
+.muted {
+  color: var(--muted);
+}
+
+.small {
+  font-size: 0.85rem;
+}
+
+/* ============================================================
+   Responsive — Tablet (≤ 720px)
+   ============================================================ */
+@media (max-width: 720px) {
+  .sticky-nav {
+    padding: 0 20px;
+  }
+
+  .nav-links {
+    gap: 18px;
+  }
+
+  /* hide the last nav item to keep it from wrapping */
+  .nav-links li:last-child {
+    display: none;
+  }
+
+  .page {
+    padding: 56px 20px 80px;
+  }
+
+  .section {
+    margin: 0 0 44px;
+  }
+
+  .card--featured {
+    grid-template-columns: 220px 1fr;
+  }
+
+  .project-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* ============================================================
+   Responsive — Mobile (≤ 520px)
+   ============================================================ */
+@media (max-width: 520px) {
+  .sticky-nav {
+    padding: 0 16px;
+  }
+
+  .nav-links {
+    gap: 12px;
+  }
+
+  .nav-links li:nth-last-child(-n+2) {
+    display: none;
+  }
+
+  .page {
+    padding: 44px 16px 64px;
+  }
+
+  .section {
+    margin: 0 0 36px;
+  }
+
+  .entry-head {
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  /* featured card stacks on mobile */
+  .card--featured {
+    grid-template-columns: 1fr;
+  }
+
+  .card-media--featured .img-placeholder {
+    height: 200px;
+    border-right: none;
+    border-bottom: 1.5px dashed var(--border-mid);
+  }
+
+  .project-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .photo-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}

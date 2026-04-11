@@ -1,0 +1,485 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Christopher Pattullo</title>
+    <meta
+      name="description"
+      content="Christopher Pattullo — ECE student at the University of Washington. Embedded systems, firmware, and hardware design."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+
+    <nav class="sticky-nav" aria-label="Site navigation">
+      <span class="nav-name">Christopher Pattullo</span>
+      <ul class="nav-links">
+        <li><a href="#about">About</a></li>
+        <li><a href="#research">Research</a></li>
+        <li><a href="#experience">Experience</a></li>
+        <li><a href="#projects">Projects</a></li>
+        <li><a href="#photography">Photography</a></li>
+      </ul>
+    </nav>
+
+    <main class="page">
+
+      <!-- ───────── Hero ───────── -->
+      <header class="hero">
+        <h1>Christopher Pattullo</h1>
+        <p class="tagline">
+          ECE student at the University of Washington. I build embedded
+          systems, firmware, and the hardware they live on.
+        </p>
+        <nav class="links" aria-label="Contact">
+          <a href="mailto:Christopher.Pattullo2027@gmail.com">Email</a>
+          <span aria-hidden="true">·</span>
+          <a
+            href="https://github.com/christopherpattullo"
+            target="_blank"
+            rel="noopener"
+            >GitHub</a
+          >
+          <span aria-hidden="true">·</span>
+          <!-- Add your LinkedIn URL below -->
+          <a href="#" target="_blank" rel="noopener">LinkedIn</a>
+        </nav>
+      </header>
+
+      <!-- ───────── About ───────── -->
+      <section class="section" id="about">
+        <h2>About</h2>
+        <p>
+          I'm a senior in Electrical and Computer Engineering at UW, graduating
+          December 2026. Most of my time goes toward embedded firmware and
+          hardware design — writing C and Rust for microcontrollers, laying out
+          PCBs in Altium, and then sitting with an oscilloscope figuring out
+          why it almost works. Outside of class I'm building robots, testing
+          mixed-signal IP, and occasionally taking my camera into the
+          mountains.
+        </p>
+      </section>
+
+      <!-- ───────── Research ───────── -->
+      <section class="section" id="research">
+        <h2>Research</h2>
+
+        <article class="entry">
+          <header class="entry-head">
+            <div>
+              <h3>Undergraduate Researcher — WireBend-Kit</h3>
+              <p class="org">
+                UW Programmable Matter Lab
+                <span class="muted">· Advisor: Prof. Martin Nisser</span>
+              </p>
+            </div>
+            <p class="when">Jan 2026 — Present</p>
+          </header>
+          <p class="blurb">
+            I joined Professor Martin Nisser's Programmable Matter Lab to work
+            on WireBend-Kit, a machine that automatically bends wire into
+            arbitrary 3D shapes. My main contribution was building a
+            closed-loop feedback system: I added electronic sensing to estimate
+            the actual bend angle after each actuation, then fed that error
+            back into the control loop to apply a correction pass. Along the
+            way I consolidated firmware across multiple microcontrollers down
+            to a single board and rewrote the Python GUI to be more intuitive
+            for iterative testing. It's been a satisfying introduction to
+            hardware-in-the-loop control systems.
+          </p>
+        </article>
+      </section>
+
+      <!-- ───────── Experience ───────── -->
+      <section class="section" id="experience">
+        <h2>Experience</h2>
+
+        <article class="entry">
+          <header class="entry-head">
+            <div>
+              <h3>Application Engineering Intern</h3>
+              <p class="org">Analog Bits · Sunnyvale, CA</p>
+            </div>
+            <p class="when">Jun 2024 — Sep 2025</p>
+          </header>
+          <p class="blurb">
+            At Analog Bits I characterized mixed-signal IP — mainly PLLs and
+            clock generation circuits — by running them through the edges of
+            their operating envelopes: temperature sweeps, voltage corners,
+            frequency limits. I built Python tooling to automate data capture
+            into structured spreadsheets, which saved a lot of tedious manual
+            work. I also rewrote large sections of customer-facing
+            documentation based on support ticket feedback; those revised
+            datasheets reduced follow-up clarification requests by about 21%.
+          </p>
+        </article>
+
+        <article class="entry">
+          <header class="entry-head">
+            <div>
+              <h3>Electrical Hardware Developer</h3>
+              <p class="org">Advanced Robotics at the University of Washington</p>
+            </div>
+            <p class="when">Sep 2023 — Present</p>
+          </header>
+          <p class="blurb">
+            I'm on the electrical hardware team for ARUW, UW's RoboMasters
+            competition robotics club. I design and lay out custom PCBs in
+            Altium — power distribution boards, sensor breakouts, motor
+            interfaces — with LTspice simulation before committing to layout.
+            The firmware side runs on embedded Rust using the Embassy async
+            runtime. A notable mechanical contribution: I redesigned the
+            ball-feeding mechanism by lowering the hopper and repositioning
+            the turret so its center of gravity sat directly over the yaw
+            axis, which meaningfully improved aiming stability.
+          </p>
+        </article>
+
+        <article class="entry">
+          <header class="entry-head">
+            <div>
+              <h3>Technical Lead</h3>
+              <p class="org">Viva · Seattle, WA</p>
+            </div>
+            <p class="when">Mar 2025 — Present</p>
+          </header>
+          <p class="blurb">
+            I lead technical development at Viva, a startup building an event
+            invitation platform. It's a small team, so I spend time both in
+            the code and coordinating architecture decisions, timelines, and
+            code reviews. Managing scope and unblocking teammates while staying
+            hands-on technically has been a different kind of challenge than
+            pure engineering work — and honestly a useful one.
+          </p>
+        </article>
+      </section>
+
+      <!-- ───────── Projects ───────── -->
+      <section class="section" id="projects">
+        <h2>Projects</h2>
+
+        <!-- Featured cards: image left / text right -->
+        <div class="featured-projects">
+
+          <article class="card card--featured">
+            <figure class="card-media card-media--featured">
+              <!-- replace div with: <img src="path/to/photo.jpg" alt="FPGA board running pipelined ARM CPU"> -->
+              <div class="img-placeholder">[ photo ]</div>
+            </figure>
+            <div class="card-body">
+              <h3><a href="projects/arm-cpu.html" class="card-link">Pipelined ARM CPU</a></h3>
+              <p class="blurb">
+                I designed a pipelined ARM processor in Verilog from scratch —
+                five pipeline stages, hazard detection and forwarding logic,
+                and a branch predictor. The trickiest part was getting hazard
+                resolution right across load-use dependencies. I synthesized
+                and tested it on an FPGA using Quartus, and spent a lot of
+                time in simulation traces figuring out exactly which edge
+                cases the forwarding network was missing.
+              </p>
+              <div class="tags">
+                <span class="tag">Verilog</span>
+                <span class="tag">FPGA</span>
+                <span class="tag">Quartus</span>
+                <span class="tag">ARM</span>
+              </div>
+            </div>
+          </article>
+
+          <article class="card card--featured">
+            <figure class="card-media card-media--featured">
+              <!-- replace div with: <img src="path/to/photo.jpg" alt="ARUW competition robot"> -->
+              <div class="img-placeholder">[ photo ]</div>
+            </figure>
+            <div class="card-body">
+              <h3><a href="projects/aruw-robot.html" class="card-link">ARUW Competition Robot Hardware</a></h3>
+              <p class="blurb">
+                The hardware I've built for the ARUW competition robot spans
+                power distribution boards, sensor breakouts, and custom motor
+                driver interfaces — all designed in Altium with LTspice
+                simulation before layout. The firmware runs on embedded Rust
+                using the Embassy framework. Getting a real-time async Rust
+                HAL working on our specific microcontroller required digging
+                into register-level peripheral documentation and writing
+                several drivers from scratch.
+              </p>
+              <div class="tags">
+                <span class="tag">Rust / Embassy</span>
+                <span class="tag">Altium</span>
+                <span class="tag">PCB Design</span>
+                <span class="tag">LTspice</span>
+              </div>
+            </div>
+          </article>
+
+        </div>
+
+        <!-- Standard cards: image top / text below -->
+        <div class="project-grid">
+
+          <article class="card card--standard">
+            <figure class="card-media">
+              <!-- replace div with: <img src="path/to/photo.jpg" alt="Desktop Reminder Buddy device"> -->
+              <div class="img-placeholder">[ photo ]</div>
+            </figure>
+            <div class="card-body">
+              <h3><a href="projects/desktop-reminder.html" class="card-link">Desktop Reminder Buddy</a></h3>
+              <p class="blurb">
+                A physical ambient calendar display next to my monitor. ESP32
+                firmware in C handles I²C display comms and UART data
+                ingestion from a Python host script. The core challenge: a
+                parser that filters and truncates event strings within a
+                fixed-width display buffer.
+              </p>
+              <div class="tags">
+                <span class="tag">C</span>
+                <span class="tag">ESP32</span>
+                <span class="tag">Python</span>
+                <span class="tag">I²C / UART</span>
+              </div>
+            </div>
+          </article>
+
+          <article class="card card--standard">
+            <figure class="card-media">
+              <!-- replace div with: <img src="path/to/photo.jpg" alt="Smart Plants soil monitoring system"> -->
+              <div class="img-placeholder">[ photo ]</div>
+            </figure>
+            <div class="card-body">
+              <h3><a href="projects/smart-plants.html" class="card-link">Smart Plants</a></h3>
+              <p class="blurb">
+                Automated soil moisture monitoring with a watering relay.
+                FreeRTOS on ESP32 wakes on a 15-minute timer, samples the ADC,
+                and triggers a relay below threshold. A startup calibration
+                routine was essential — capacitive soil sensors drift a lot.
+              </p>
+              <div class="tags">
+                <span class="tag">C</span>
+                <span class="tag">FreeRTOS</span>
+                <span class="tag">ESP32</span>
+                <span class="tag">ADC</span>
+              </div>
+            </div>
+          </article>
+
+          <article class="card card--standard">
+            <figure class="card-media">
+              <!-- replace div with: <img src="path/to/photo.jpg" alt="WireBend-Kit machine close-up"> -->
+              <div class="img-placeholder">[ photo ]</div>
+            </figure>
+            <div class="card-body">
+              <h3><a href="projects/wirebend-kit.html" class="card-link">WireBend-Kit — Angle Feedback</a></h3>
+              <p class="blurb">
+                Added closed-loop angle sensing to the wire-bending research
+                machine. The system reads back the actual bend angle, computes
+                the error, and commands a correction pass — turning an
+                open-loop machine into a reliable, repeatable fabrication tool.
+              </p>
+              <div class="tags">
+                <span class="tag">Python</span>
+                <span class="tag">Embedded C</span>
+                <span class="tag">Control Systems</span>
+              </div>
+            </div>
+          </article>
+
+          <article class="card card--standard">
+            <figure class="card-media">
+              <!-- replace div with: <img src="path/to/photo.jpg" alt="Viva app on phone"> -->
+              <div class="img-placeholder">[ photo ]</div>
+            </figure>
+            <div class="card-body">
+              <h3><a href="projects/viva.html" class="card-link">Viva — Event Platform</a></h3>
+              <p class="blurb">
+                Mobile-first event invitation and RSVP tracking app. React
+                frontend, Node/Express backend, PostgreSQL. My focus has been
+                the invitation-linking system and keeping three engineers
+                aligned on architecture decisions without slowing down
+                shipping.
+              </p>
+              <div class="tags">
+                <span class="tag">React</span>
+                <span class="tag">Node.js</span>
+                <span class="tag">PostgreSQL</span>
+                <span class="tag">TypeScript</span>
+              </div>
+            </div>
+          </article>
+
+          <article class="card card--standard">
+            <figure class="card-media">
+              <!-- replace div with: <img src="path/to/photo.jpg" alt="Custom PCB layout in Altium"> -->
+              <div class="img-placeholder">[ photo ]</div>
+            </figure>
+            <div class="card-body">
+              <h3><a href="projects/power-signal-boards.html" class="card-link">Power &amp; Signal Board Design</a></h3>
+              <p class="blurb">
+                Several production-intent PCBs for competition robotics —
+                power distribution handling peak motor currents with careful
+                ground plane separation, and an IMU breakout with
+                impedance-controlled layout. Each board taught me something
+                new about the gap between simulation and bench reality.
+              </p>
+              <div class="tags">
+                <span class="tag">Altium</span>
+                <span class="tag">LTspice</span>
+                <span class="tag">PLECS</span>
+              </div>
+            </div>
+          </article>
+
+          <!-- Placeholder cards — fill in as you go -->
+          <article class="card card--standard card--placeholder">
+            <figure class="card-media">
+              <div class="img-placeholder">[ photo ]</div>
+            </figure>
+            <div class="card-body">
+              <h3 class="muted">Coming soon</h3>
+              <p class="blurb muted">Project coming soon.</p>
+              <div class="tags"></div>
+            </div>
+          </article>
+
+          <article class="card card--standard card--placeholder">
+            <figure class="card-media">
+              <div class="img-placeholder">[ photo ]</div>
+            </figure>
+            <div class="card-body">
+              <h3 class="muted">Coming soon</h3>
+              <p class="blurb muted">Project coming soon.</p>
+              <div class="tags"></div>
+            </div>
+          </article>
+
+          <article class="card card--standard card--placeholder">
+            <figure class="card-media">
+              <div class="img-placeholder">[ photo ]</div>
+            </figure>
+            <div class="card-body">
+              <h3 class="muted">Coming soon</h3>
+              <p class="blurb muted">Project coming soon.</p>
+              <div class="tags"></div>
+            </div>
+          </article>
+
+        </div>
+      </section>
+
+      <!-- ───────── Education ───────── -->
+      <section class="section" id="education">
+        <h2>Education</h2>
+        <article class="entry">
+          <header class="entry-head">
+            <div>
+              <h3>University of Washington</h3>
+              <p class="org">
+                B.S., Electrical and Computer Engineering · ECE GPA 3.86
+              </p>
+            </div>
+            <p class="when">Sep 2023 — Dec 2026</p>
+          </header>
+          <p class="coursework">
+            Embedded Systems · Computer Architecture · VLSI · Circuit Theory ·
+            Digital Circuits and Systems · Digital Signal Processing · Robotics
+            and Controls · Statistics
+          </p>
+        </article>
+      </section>
+
+      <!-- ───────── Skills ───────── -->
+      <section class="section" id="skills">
+        <h2>Toolbox</h2>
+        <div class="skill-grid">
+          <div>
+            <h4>Languages</h4>
+            <p>C, C++, Rust, Python, MATLAB, Java, JavaScript, Verilog</p>
+          </div>
+          <div>
+            <h4>Hardware</h4>
+            <p>
+              FPGA, PCB design &amp; layout, soldering, 3D printing, I²C,
+              UART, LTspice, PLECS
+            </p>
+          </div>
+          <div>
+            <h4>Tools</h4>
+            <p>
+              Altium, KiCad, Quartus, IAR, Ozone, Segger J-Link, NI Multisim,
+              SolidWorks, Fusion, OnShape
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ───────── Photography ───────── -->
+      <section class="section" id="photography">
+        <h2>Photography</h2>
+        <p class="section-lead">
+          I shoot mostly landscapes and nature — the PNW gives you a lot to
+          work with.
+        </p>
+        <div class="photo-grid">
+
+          <figure class="photo-slot">
+            <!-- replace div with: <img src="path/to/photo.jpg" alt="..."> -->
+            <div class="img-placeholder">[ photo ]</div>
+            <figcaption></figcaption>
+          </figure>
+
+          <figure class="photo-slot">
+            <div class="img-placeholder">[ photo ]</div>
+            <figcaption></figcaption>
+          </figure>
+
+          <figure class="photo-slot">
+            <div class="img-placeholder">[ photo ]</div>
+            <figcaption></figcaption>
+          </figure>
+
+          <figure class="photo-slot">
+            <div class="img-placeholder">[ photo ]</div>
+            <figcaption></figcaption>
+          </figure>
+
+          <figure class="photo-slot">
+            <div class="img-placeholder">[ photo ]</div>
+            <figcaption></figcaption>
+          </figure>
+
+          <figure class="photo-slot">
+            <div class="img-placeholder">[ photo ]</div>
+            <figcaption></figcaption>
+          </figure>
+
+        </div>
+      </section>
+
+      <!-- ───────── Outside ───────── -->
+      <section class="section" id="outside">
+        <h2>Outside of work</h2>
+        <p>
+          When I'm not at a workbench I'm usually behind a camera, hiking
+          somewhere in the PNW, tinkering with a side project, or feeding
+          something into the 3D printer. The making and the breaking are kind
+          of the same hobby.
+        </p>
+      </section>
+
+      <!-- ───────── Footer ───────── -->
+      <footer class="footer">
+        <p>
+          <a href="mailto:Christopher.Pattullo2027@gmail.com">Get in touch</a>
+        </p>
+        <p class="muted small">Seattle, WA</p>
+      </footer>
+
+    </main>
+  </body>
+</html>

@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>ARUW Competition Robot Hardware — Christopher Pattullo</title>
+    <meta
+      name="description"
+      content="Custom PCB design and Rust firmware for the Advanced Robotics at UW RoboMasters competition robot."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../styles.css" />
+  </head>
+  <body>
+
+    <nav class="sticky-nav" aria-label="Site navigation">
+      <a class="nav-back" href="../index.html">← Christopher Pattullo</a>
+      <ul class="nav-links">
+        <li><a href="../index.html#projects">Projects</a></li>
+        <li><a href="../index.html#experience">Experience</a></li>
+        <li><a href="../index.html#about">About</a></li>
+      </ul>
+    </nav>
+
+    <main class="page project-page">
+
+      <header class="project-hero">
+        <a class="project-back" href="../index.html#projects">← All projects</a>
+        <h1>ARUW Competition Robot Hardware</h1>
+        <p class="project-tagline">
+          Custom PCBs, embedded Rust firmware, and mechanical design for
+          Advanced Robotics at UW's RoboMasters competition robot — ongoing
+          since September 2023.
+        </p>
+        <div class="tags">
+          <span class="tag">Altium</span>
+          <span class="tag">Rust / Embassy</span>
+          <span class="tag">PCB Design</span>
+          <span class="tag">LTspice</span>
+          <span class="tag">PLECS</span>
+          <span class="tag">RoboMasters</span>
+        </div>
+      </header>
+
+      <section class="project-section">
+        <h2>Overview</h2>
+        <p>
+          Advanced Robotics at UW competes in ICRA's RoboMasters competition,
+          where fully autonomous robots play a real-time shooting game against
+          other university teams. I'm on the electrical hardware team, which
+          means I'm responsible for the PCBs, sensors, and the firmware that
+          ties it all together.
+        </p>
+        <p>
+          This isn't a one-semester project — it's an ongoing engineering
+          effort with real consequences: a PCB failure at competition means
+          the robot doesn't work, and there's no swap. That pressure has been
+          one of the most valuable parts of the experience.
+        </p>
+      </section>
+
+      <section class="project-section">
+        <h2>Hardware design</h2>
+
+        <h3>PCB design and simulation</h3>
+        <p>
+          I design boards in Altium Designer, working from schematic capture
+          through layout to Gerber generation. Every power board goes through
+          simulation in LTspice and PLECS before layout — I want to understand
+          the switching waveforms, peak currents, and thermal behavior before
+          committing to copper. The competition robot has peak motor current
+          demands that require careful trace sizing and bypass capacitor
+          placement, and ground plane management is critical to keeping
+          switching noise off the sensor rails.
+        </p>
+
+        <h3>Boards I've designed</h3>
+        <ul class="spec-list">
+          <li>Power distribution board — handles peak motor current with split ground planes</li>
+          <li>Sensor breakouts — IMU, encoder interfaces, with impedance-controlled layouts</li>
+          <li>Motor driver interface boards — bridges the microcontroller to the CAN bus motor controllers</li>
+        </ul>
+      </section>
+
+      <section class="project-section">
+        <h2>Firmware</h2>
+        <p>
+          The embedded software runs on Rust using the Embassy async runtime.
+          Embassy is a no-std embedded framework that gives you async/await
+          on bare metal, which is compelling for a robot that's managing
+          multiple concurrent hardware peripherals. Getting it running on our
+          specific microcontroller required writing a few low-level drivers
+          from scratch — the existing Embassy HAL support didn't cover all the
+          peripherals we needed, so I read the register-level docs and
+          implemented the missing pieces.
+        </p>
+        <p>
+          The firmware handles sensor acquisition, CAN bus communication with
+          the motor controllers, and the control loops that actually aim and
+          fire the turret. Writing safety-critical control code in Rust's type
+          system is genuinely different from C — the borrow checker pushes you
+          toward designs where data races and invalid state are harder to
+          introduce.
+        </p>
+      </section>
+
+      <section class="project-section">
+        <h2>Mechanical contributions</h2>
+        <p>
+          Beyond the electrical work, I redesigned the ball-feeding mechanism
+          for the shooting system. The original design placed the ball hopper
+          high on the robot, which raised the center of mass and made the
+          turret oscillate on fast yaw moves. I moved the hopper lower and
+          repositioned the turret assembly so its center of gravity sits
+          directly over the yaw axis. The result was noticeably better aiming
+          stability, especially during rapid traversal.
+        </p>
+        <p>
+          I also redesigned the minor turret, reducing its weight by 41% while
+          improving structural rigidity and expanding the yaw and pitch range
+          of motion — changes that came from taking a hard look at which parts
+          were overbuilt and where material had been added defensively rather
+          than analytically.
+        </p>
+      </section>
+
+      <div class="media-grid">
+        <figure class="media-slot">
+          <!-- replace with <img src="../img/aruw-pcb-layout.jpg" alt="Altium PCB layout"> -->
+          <div class="img-placeholder">[ PCB layout ]</div>
+          <figcaption>Altium layout — power distribution board</figcaption>
+        </figure>
+        <figure class="media-slot">
+          <!-- replace with <img src="../img/aruw-robot.jpg" alt="ARUW competition robot"> -->
+          <div class="img-placeholder">[ robot ]</div>
+          <figcaption>ARUW competition robot</figcaption>
+        </figure>
+        <figure class="media-slot">
+          <!-- replace with <img src="../img/aruw-bench.jpg" alt="PCB on the test bench"> -->
+          <div class="img-placeholder">[ bench test ]</div>
+          <figcaption>Board bring-up on the bench</figcaption>
+        </figure>
+        <figure class="media-slot">
+          <!-- replace with <img src="../img/aruw-scope.jpg" alt="Oscilloscope trace from motor board"> -->
+          <div class="img-placeholder">[ oscilloscope trace ]</div>
+          <figcaption>Motor driver switching waveform</figcaption>
+        </figure>
+      </div>
+
+      <section class="project-section">
+        <h2>Key challenges</h2>
+        <p>
+          The hardest part of PCB work is that failures are expensive and slow
+          — a two-week turnaround for fabrication means a mistake discovered
+          late costs a lot of time. I've become much more disciplined about
+          design review, simulation, and checking footprints carefully before
+          sending Gerbers. Catching a pad size error in simulation is free;
+          catching it after the board arrives is a respin.
+        </p>
+        <p>
+          On the firmware side, getting Embassy's async executor to behave
+          predictably alongside hard real-time control loops required
+          understanding the executor's scheduling model. Embassy tasks aren't
+          preemptive, so long-running work in one task can delay others. I
+          restructured the critical control loop tasks to minimize yield points
+          and ensure the timing guarantees the motor controllers need.
+        </p>
+      </section>
+
+      <section class="project-section">
+        <h2>What I'd do differently</h2>
+        <p>
+          I'd invest more time up front in a hardware-in-the-loop test bench
+          that lets us test firmware against real motor loads before
+          competition. Right now too much testing happens on the actual robot,
+          which is slow and risks damaging hardware. A bench setup with a
+          dynamometer and a current clamp would let us iterate much faster.
+        </p>
+      </section>
+
+    </main>
+  </body>
+</html>

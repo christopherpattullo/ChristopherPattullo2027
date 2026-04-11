@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Power &amp; Signal Board Design — Christopher Pattullo</title>
+    <meta
+      name="description"
+      content="Custom PCB design for competition robotics — power distribution, sensor breakouts, and impedance-controlled layouts in Altium."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../styles.css" />
+  </head>
+  <body>
+
+    <nav class="sticky-nav" aria-label="Site navigation">
+      <a class="nav-back" href="../index.html">← Christopher Pattullo</a>
+      <ul class="nav-links">
+        <li><a href="../index.html#projects">Projects</a></li>
+        <li><a href="../index.html#experience">Experience</a></li>
+        <li><a href="../index.html#about">About</a></li>
+      </ul>
+    </nav>
+
+    <main class="page project-page">
+
+      <header class="project-hero">
+        <a class="project-back" href="../index.html#projects">← All projects</a>
+        <h1>Power &amp; Signal Board Design</h1>
+        <p class="project-tagline">
+          A collection of production-intent PCBs designed for the ARUW
+          competition robot — from high-current power distribution to
+          precision sensor interfaces.
+        </p>
+        <div class="tags">
+          <span class="tag">Altium Designer</span>
+          <span class="tag">LTspice</span>
+          <span class="tag">PLECS</span>
+          <span class="tag">PCB Layout</span>
+          <span class="tag">Signal Integrity</span>
+        </div>
+      </header>
+
+      <section class="project-section">
+        <h2>Overview</h2>
+        <p>
+          This page covers the PCB design work I've done outside of the
+          ARUW robot overview — the individual boards, what made each one
+          interesting, and what I learned from bringing them up. PCB design
+          is one of those skills where you learn most from the mistakes, and
+          I've made most of the classic ones at least once.
+        </p>
+      </section>
+
+      <section class="project-section">
+        <h2>Power distribution board</h2>
+        <p>
+          The power distribution board is the most unforgiving board on the
+          robot — it takes raw battery voltage and distributes it to motors,
+          microcontrollers, and sensors. The motor loads are intermittent and
+          can draw large peak currents during acceleration, which sends
+          switching noise through the power rails and into anything sharing
+          the ground plane.
+        </p>
+        <p>
+          The key design decisions were: separate analog and digital ground
+          planes joined at a single star point near the power entry, wide
+          copper pours for high-current paths (calculated using IPC-2221
+          trace width guidelines, then derated for thermal margin), and
+          bulk capacitance on each motor rail to absorb current spikes before
+          they propagate upstream. I simulated the worst-case transient in
+          LTspice before layout to verify that the bulk cap sizing was
+          sufficient and that the ESR of the chosen capacitors was low enough.
+        </p>
+      </section>
+
+      <section class="project-section">
+        <h2>IMU sensor breakout</h2>
+        <p>
+          The IMU breakout is a smaller board but has stricter electrical
+          requirements. The IMU communicates over SPI at several MHz, and
+          at those speeds the traces start to act as transmission lines if
+          they're too long or too close to switching signals. I used a
+          controlled impedance stackup (targeting 50 Ω for the single-ended
+          SPI traces) and kept the routing short and away from the power
+          converter switching nodes.
+        </p>
+        <p>
+          The board also has a bypass capacitor footprint as close to the
+          IMU's power pin as possible — ideally within a few millimeters.
+          On an earlier iteration I placed the bypass cap on the far side of
+          the board, and the IMU readings were noticeably noisier. Moving
+          it adjacent to the power pin on the next revision fixed the issue
+          cleanly.
+        </p>
+      </section>
+
+      <div class="media-grid">
+        <figure class="media-slot">
+          <!-- replace with <img src="../img/pdb-layout.jpg" alt="Power distribution board layout in Altium"> -->
+          <div class="img-placeholder">[ PDB layout ]</div>
+          <figcaption>Power distribution board — Altium layout</figcaption>
+        </figure>
+        <figure class="media-slot">
+          <!-- replace with <img src="../img/pdb-assembled.jpg" alt="Assembled power board"> -->
+          <div class="img-placeholder">[ assembled board ]</div>
+          <figcaption>Assembled and populated board</figcaption>
+        </figure>
+        <figure class="media-slot">
+          <!-- replace with <img src="../img/imu-breakout.jpg" alt="IMU breakout board"> -->
+          <div class="img-placeholder">[ IMU breakout ]</div>
+          <figcaption>IMU sensor breakout</figcaption>
+        </figure>
+        <figure class="media-slot">
+          <!-- replace with <img src="../img/ltspice-sim.jpg" alt="LTspice transient simulation"> -->
+          <div class="img-placeholder">[ LTspice simulation ]</div>
+          <figcaption>Transient simulation before layout</figcaption>
+        </figure>
+      </div>
+
+      <section class="project-section">
+        <h2>Design process</h2>
+        <p>
+          My process for each board follows the same sequence: start with
+          a block diagram, move to schematic with all component values chosen
+          and simulated, do a design review before touching layout, route the
+          board with the signal-integrity-critical traces first, then run DRC
+          and visual inspection. The design review step — even just walking
+          through the schematic myself with fresh eyes — has caught errors that
+          would have caused a board respin.
+        </p>
+        <p>
+          Footprint verification is the step I'm most disciplined about now,
+          after reworking a connector that had the pad spacing wrong on the
+          first version. I check every critical footprint against the component
+          datasheet before sending Gerbers. It adds an hour to the process
+          and has saved me at least two respins.
+        </p>
+      </section>
+
+      <section class="project-section">
+        <h2>What I've learned</h2>
+        <p>
+          The gap between simulation and physical reality is real, but it's
+          smaller than you might expect if you simulate the right things.
+          LTspice with accurate component models (using the manufacturer's
+          SPICE model, not an ideal switch) gets you surprisingly close to
+          what you measure on the bench. Where it falls short is in the
+          parasitics from the PCB itself — trace inductance, via capacitance,
+          ground plane resonance — which is why signal integrity tools and
+          field solvers exist.
+        </p>
+        <p>
+          The other major lesson: thermal design is easy to ignore in
+          simulation because simulators don't care about junction temperature.
+          I now calculate worst-case power dissipation and check it against
+          the component's thermal resistance to ambient before committing to
+          a package size.
+        </p>
+      </section>
+
+    </main>
+  </body>
+</html>
