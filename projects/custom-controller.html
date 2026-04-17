@@ -141,6 +141,52 @@
         </p>
       </section>
 
+      <div class="media-grid media-grid--3">
+        <figure class="media-slot">
+          <img
+            src="../photos/ARUWCustomControllerPCB.png"
+            alt="Assembled custom controller PCB"
+            loading="lazy"
+            decoding="async">
+          <figcaption>Assembled PCB</figcaption>
+        </figure>
+        <figure class="media-slot">
+          <img
+            src="../photos/ARUWCustomControllerLayout.png"
+            alt="Altium PCB layout of the custom controller"
+            loading="lazy"
+            decoding="async">
+          <figcaption>Altium layout</figcaption>
+        </figure>
+        <figure class="media-slot">
+          <img
+            src="../photos/ARUWCustomControlerSchematic.png"
+            alt="Custom controller schematic"
+            loading="lazy"
+            decoding="async">
+          <figcaption>Schematic capture</figcaption>
+        </figure>
+        <figure class="media-slot">
+          <img
+            src="../photos/CustomController_BootloaderBurning.JPG"
+            alt="Burning the bootloader via Arduino-as-ISP"
+            loading="lazy"
+            decoding="async">
+          <figcaption>Burning the bootloader via Arduino-as-ISP</figcaption>
+        </figure>
+        <figure class="media-slot media-slot--wide">
+          <video
+            src="../videos/CustomController_First_tests.MOV"
+            controls
+            preload="metadata"
+            aria-label="First functional test of the custom controller">
+            Your browser can't play this video format.
+            <a href="../videos/CustomController_First_tests.MOV">Download the video</a>.
+          </video>
+          <figcaption>First functional test — matrix scan + HID output</figcaption>
+        </figure>
+      </div>
+
       <section class="project-section">
         <h2>Deployment</h2>
         <p>
@@ -150,19 +196,6 @@
           we can swap between the custom controller and a fallback keyboard
           without reconfiguring anything upstream. Everything from the PCB to
           the firmware is our own — which is the part I'm most proud of.
-        </p>
-      </section>
-
-      <section class="project-section">
-        <h2>What I'd do differently</h2>
-        <p>
-          I'd move the firmware off the Arduino core and onto a bare-metal
-          C or Rust setup next revision. The Arduino HID stack is fine, but
-          I've been bitten once by latency spikes I couldn't fully explain,
-          and having direct control over the USB endpoint scheduling would
-          let me guarantee input timing. I'd also add a second PCB revision
-          with per-key RGB so the operator can see mode state without
-          looking up at a screen.
         </p>
       </section>
 

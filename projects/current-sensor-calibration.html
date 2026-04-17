@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Current Sensor Flash Calibration — Christopher Pattullo</title>
+    <meta
+      name="description"
+      content="Rewriting the ARUW current sensor calibration firmware in Rust with Embassy on STM32 — storing per-board constants in a dedicated flash region so firmware updates never overwrite calibration."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../styles.css" />
+  </head>
+  <body>
+
+    <nav class="sticky-nav" aria-label="Site navigation">
+      <a class="nav-back" href="../index.html">← Christopher Pattullo</a>
+      <ul class="nav-links">
+        <li><a href="../index.html#projects">Projects</a></li>
+        <li><a href="../index.html#experience">Experience</a></li>
+        <li><a href="../index.html#about">About</a></li>
+      </ul>
+    </nav>
+
+    <main class="page project-page">
+
+      <header class="project-hero">
+        <a class="project-back" href="../index.html#projects">← All projects</a>
+        <h1>Current Sensor Flash Calibration</h1>
+        <p class="project-tagline">
+          Retiring the paper-label calibration process on ARUW's current
+          sensor boards: I rewrote the firmware in Rust with Embassy so
+          each board stores its own calibration constants in a reserved
+          region of flash memory — surviving firmware updates, ending the
+          physical bookkeeping, and making sensor bring-up repeatable.
+        </p>
+        <div class="tags">
+          <span class="tag">Rust</span>
+          <span class="tag">Embassy</span>
+          <span class="tag">STM32</span>
+          <span class="tag">embedded-storage</span>
+          <span class="tag">Flash</span>
+          <span class="tag">CAN</span>
+          <span class="tag">SEGGER RTT</span>
+          <span class="tag">Ozone</span>
+        </div>
+      </header>
+
+      <section class="project-section">
+        <h2>The problem</h2>
+        <p>
+          ARUW's current sensor boards measure motor and system currents
+          across the robot and report them over CAN to the main control
+          boards. Every individual sensor board has a slightly different
+          offset and gain — silicon variation, resistor tolerance, and
+          layout-dependent offsets all contribute — so each board needs
+          its own calibration constants to produce accurate readings.
+        </p>
+        <p>
+          The old system handled this with <em>physical bookkeeping</em>.
+          Each board got a printed label with a calibration ID, and
+          somewhere else (a spreadsheet, a text file, a teammate's head)
+          lived the mapping from that ID to the actual calibration
+          constants. At flash time the correct constants had to be compiled
+          into firmware and loaded onto the right board. Any mismatch
+          between the label and what ended up on-chip silently produced
+          wrong current readings on a live robot.
+        </p>
+        <p>
+          Worse, every firmware update re-flashed the whole chip — so the
+          calibration "baked in" at build time was also erased at every
+          update and had to be re-applied, perfectly, every time. It was
+          fragile, error-prone, and a recurring source of debugging pain.
+        </p>
+      </section>
+
+      <div class="media-grid">
+        <figure class="media-slot media-slot--wide">
+          <img
+            src="../photos/CurrentSensorPCB.png"
+            alt="ARUW current sensor board"
+            loading="lazy"
+            decoding="async">
+          <figcaption>The current sensor board — one of many deployed across the robot</figcaption>
+        </figure>
+      </div>
+
+      <section class="project-section">
+        <h2>The fix: calibration lives on the board</h2>
+        <p>
+          The obvious improvement was to make each board store its own
+          calibration directly in on-chip flash, so "which constants go
+          with which board" stops being a human-memory problem. The
+          constants get written once at bring-up time, then read back at
+          every boot from a fixed flash location that the firmware never
+          touches during normal updates.
+        </p>
+        <p>
+          That turned into three pieces of work: a <em>programmer</em>
+          that writes calibration values into the right place, a
+          <em>runtime</em> that reads them back into RAM at startup, and
+          a <em>linker configuration</em> that carves out a region of
+          flash the rest of the firmware won't touch.
+        </p>
+      </section>
+
+      <section class="project-section">
+        <h2>The calibration programmer</h2>
+        <p>
+          Rust is deliberately strict about memory access — you can't just
+          pick a pointer and write bytes at it — so driving flash required
+          going through a proper abstraction. I built a small standalone
+          program, separate from the main firmware, whose only job is to
+          write calibration constants into flash. It uses the
+          <code>embedded-storage</code> crate to abstract over the STM32's
+          flash peripheral: unlock, erase the target sector, program the
+          bytes, and verify the readback.
+        </p>
+        <p>
+          The programmer takes the calibration values as input — either
+          via a command-line parameter baked into the build or loaded from
+          a bench measurement script — and commits them to the reserved
+          flash region. Once it runs successfully on a new board, that
+          board is calibrated for the rest of its life regardless of what
+          gets flashed on top of it.
+        </p>
+      </section>
+
+      <section class="project-section">
+        <h2>The runtime read path</h2>
+        <p>
+          The production firmware — the one that actually runs on the
+          robot, reads the sensor, and pushes values over CAN — starts by
+          pulling the calibration constants out of flash into RAM. Same
+          <code>embedded-storage</code> abstraction as the programmer,
+          just on the read side: open the flash partition, read the
+          calibration struct at its fixed offset, and keep it in memory
+          for the rest of the boot.
+        </p>
+        <p>
+          From there, the normal sensor loop does what it always did —
+          sample the ADC, apply the calibration, publish over CAN — but
+          now the calibration step uses values that are guaranteed to
+          match the physical board it's running on. No more per-build
+          constants, no labels, no mapping tables. The sensor reports
+          correctly the first time it boots after a firmware update.
+        </p>
+      </section>
+
+      <section class="project-section">
+        <h2>Reserving the flash region with <code>memory.x</code></h2>
+        <p>
+          The critical detail that makes this all work: the calibration
+          region has to survive a firmware reflash. On a stock linker
+          configuration, flashing new firmware happily wipes the entire
+          program flash — including anything I'd written there earlier —
+          and the calibration disappears.
+        </p>
+        <p>
+          The fix is at the linker level. In the <code>memory.x</code>
+          file I split flash into two regions: a larger region for code
+          and read-only data, and a smaller region reserved for
+          calibration. The main firmware's link script only places code
+          and data in the code region, so a reflash never targets the
+          calibration sector. The programmer writes to the calibration
+          region directly via the flash peripheral, bypassing the linker
+          entirely. Clean separation, and the flash sector that holds
+          calibration is effectively invisible to the normal build.
+        </p>
+      </section>
+
+      <section class="project-section">
+        <h2>Tooling and workflow</h2>
+        <p>
+          The whole thing is Rust + Embassy on an STM32. I used SEGGER
+          RTT for real-time logging during bring-up, flashing through a
+          J-Link with Ozone as the debugger — the combination makes
+          stepping through the flash programmer and watching the erase /
+          write / verify cycle actually pleasant to debug. That tooling
+          loop mattered a lot: the cost of a mistake writing to flash is
+          potentially bricking a board, so being able to set breakpoints
+          around the programming sequence and inspect memory live was
+          worth the setup time many times over.
+        </p>
+      </section>
+
+      <section class="project-section">
+        <h2>Bringing up new sensors</h2>
+        <p>
+          Alongside the firmware work, I handled the physical bring-up of
+          new current sensor boards as they arrived — the first-power,
+          sanity-check, calibrate, deploy workflow. That meant running
+          the programmer against each new board, collecting and
+          documenting the measured constants, and verifying the readings
+          matched what the rest of the robot expected.
+        </p>
+        <p>
+          More importantly, I wrote down the whole process: how the flash
+          regions are laid out, what the programmer expects, how to
+          measure the calibration values on the bench, how to verify a
+          new board with RTT logging, and how to recover if something
+          goes wrong. The team had been losing institutional knowledge
+          every graduation cycle; the docs are there so the next person
+          who has to bring up a sensor board doesn't have to reverse-
+          engineer the system from the code.
+        </p>
+      </section>
+
+      <section class="project-section">
+        <h2>Impact</h2>
+        <p>
+          The calibration is now a one-time step per physical board.
+          Firmware can be updated as many times as needed without
+          touching calibration — the constants stay put in their reserved
+          flash region, and the runtime picks them up on every boot.
+          Mislabeled boards and calibration-lost-in-reflash bugs are
+          gone. And the bring-up workflow is now a documented procedure
+          that doesn't require me (or anyone specific) to be in the room.
+        </p>
+      </section>
+
+    </main>
+  </body>
+</html>

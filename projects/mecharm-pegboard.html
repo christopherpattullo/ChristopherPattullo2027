@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>MechArm 270 — Drag-Teach &amp; Inverse Kinematics — Christopher Pattullo</title>
+    <meta
+      name="description"
+      content="A drag-teach recorder and a Python inverse kinematics driver for the Elephant Robotics MechArm 270, demonstrated by placing six pegs into a pegboard from ruler-measured coordinates."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../styles.css" />
+  </head>
+  <body>
+
+    <nav class="sticky-nav" aria-label="Site navigation">
+      <a class="nav-back" href="../index.html">← Christopher Pattullo</a>
+      <ul class="nav-links">
+        <li><a href="../index.html#projects">Projects</a></li>
+        <li><a href="../index.html#experience">Experience</a></li>
+        <li><a href="../index.html#about">About</a></li>
+      </ul>
+    </nav>
+
+    <main class="page project-page">
+
+      <header class="project-hero">
+        <a class="project-back" href="../index.html#projects">← All projects</a>
+        <h1>MechArm 270 — Drag-Teach &amp; Inverse Kinematics</h1>
+        <p class="project-tagline">
+          Two complementary control modes for the Elephant Robotics
+          MechArm 270: a drag-teach recorder that learns motions from human
+          guidance, and a Python inverse kinematics driver that moves the
+          end-effector to ruler-measured coordinates — demonstrated by
+          placing six pegs into a pegboard.
+        </p>
+        <div class="tags">
+          <span class="tag">Python</span>
+          <span class="tag">Inverse Kinematics</span>
+          <span class="tag">Robotics</span>
+          <span class="tag">MechArm 270</span>
+          <span class="tag">Teammate Project</span>
+        </div>
+      </header>
+
+      <section class="project-section">
+        <h2>The idea</h2>
+        <p>
+          This was a teammate project — three of us — built around Elephant
+          Robotics' MechArm 270, a 6-DOF desktop arm. We wanted to explore
+          two fundamentally different ways of commanding a robotic arm: a
+          "show, don't tell" drag-teach mode where a human physically
+          guides the arm through a motion, and a coordinate-driven mode
+          where you specify where the end-effector should go in Cartesian
+          space and let software solve for the joint angles.
+        </p>
+        <p>
+          As a concrete goal to validate both approaches, we picked a task
+          that's easy to describe and hard to cheat: place six pegs into
+          the holes of a pegboard. Miss by a few millimeters in either
+          direction and the peg either won't go in or jams the arm against
+          the board.
+        </p>
+      </section>
+
+      <section class="project-section">
+        <h2>Drag-teach mode</h2>
+        <p>
+          Drag-teach works by putting the arm's servos into a released,
+          low-torque state so the joints move freely under hand pressure.
+          The script polls each joint's encoder at a fixed rate while a
+          human walks the arm through the motion, logging the angle of
+          every joint at each sample. When recording stops, you have a
+          dense time-series of joint configurations describing the
+          demonstrated motion.
+        </p>
+        <p>
+          Playback re-engages the servos and commands the arm to reproduce
+          that trajectory — ideally returning to each recorded
+          configuration in order. The nice property of this mode is that
+          it sidesteps inverse kinematics entirely: because you recorded
+          joint angles directly, there's no solver in the playback path,
+          no ambiguity about which arm configuration to use for a given
+          end-effector pose, and no singularities to worry about. The
+          tradeoff is that every new motion requires a physical
+          demonstration — there's no way to compose or adapt a recorded
+          motion programmatically.
+        </p>
+      </section>
+
+      <section class="project-section">
+        <h2>Inverse kinematics mode</h2>
+        <p>
+          The second control mode flips the problem: instead of specifying
+          joint angles, you specify where the end-effector should be in
+          3D space — target position plus orientation — and a Python
+          inverse kinematics solver figures out the joint angles that put
+          the tool tip there. That lets you describe a task in natural
+          coordinates (hole at <code>(x, y, z)</code>) rather than in the
+          arm's internal joint space.
+        </p>
+        <p>
+          Our calibration procedure was intentionally low-tech: we picked
+          an origin on the work surface, measured the position of each
+          target with a ruler, and typed those numbers into the script.
+          For the pegboard, that meant measuring the six hole locations
+          once at setup and then letting the IK solver handle everything
+          else. End-effector orientation matters too — a peg needs to go
+          in roughly perpendicular to the board — so the solver takes
+          both position and orientation as inputs for each target.
+        </p>
+      </section>
+
+      <section class="project-section">
+        <h2>The pegboard demo</h2>
+        <p>
+          Putting it together: we specified the six hole coordinates
+          relative to the chosen origin, set the desired approach
+          orientation, and ran the sequence. The IK solver produces a
+          joint-space path for each peg — pick up, move above the hole,
+          descend, release, retract — and the arm executes them in turn.
+          With the measurements done correctly and the gripper tuned, it
+          seats all six pegs cleanly.
+        </p>
+        <div class="media-grid">
+          <figure class="media-slot media-slot--wide">
+            <video
+              src="../videos/Mecharm270_PegBoard_Control.mov"
+              controls
+              autoplay
+              muted
+              loop
+              playsinline
+              preload="metadata"
+              aria-label="MechArm 270 placing pegs into a pegboard using inverse kinematics">
+              Your browser can't play this video format.
+              <a href="../videos/Mecharm270_PegBoard_Control.mov">Download the video</a>.
+            </video>
+            <figcaption>Placing six pegs into a pegboard using the IK driver</figcaption>
+          </figure>
+        </div>
+      </section>
+
+      <section class="project-section">
+        <h2>What I took away</h2>
+        <p>
+          The two modes made a good side-by-side lesson in the tradeoffs of
+          robot programming. Drag-teach is fast to set up and requires
+          almost no math, but every new motion is a new demonstration, and
+          you can't adapt a recorded trajectory if the workspace changes.
+          Inverse kinematics takes more work up front — solver, calibration,
+          orientation handling — but you get a much more flexible system at
+          the end, one where changing the target position is a single edit
+          rather than a full re-recording. For anything where the
+          environment has structure worth measuring, the IK approach
+          clearly wins. Drag-teach earns its keep for one-off or
+          loosely-specified motions where a demonstration is just easier
+          than math.
+        </p>
+      </section>
+
+    </main>
+  </body>
+</html>

@@ -33,18 +33,44 @@
         <a class="project-back" href="../index.html#projects">← All projects</a>
         <h1>WireBend-Kit — Angle Feedback</h1>
         <p class="project-tagline">
-          Closing the loop on a wire-bending fabrication machine by adding
-          electronic angle sensing and a correction pass — turning an
-          open-loop machine into a repeatable tool.
+          Closing the loop on a wire-bending fabrication machine at the UW
+          Programmable Matter Lab — adding electronic angle sensing, a
+          correction pass, and a consolidated firmware / GUI stack that
+          turned an open-loop research prototype into a repeatable
+          fabrication tool.
         </p>
         <div class="tags">
           <span class="tag">Python</span>
           <span class="tag">Embedded C</span>
           <span class="tag">Control Systems</span>
+          <span class="tag">Hardware-in-the-Loop</span>
           <span class="tag">Research</span>
           <span class="tag">Programmable Matter Lab</span>
         </div>
       </header>
+
+      <section class="project-section">
+        <h2>Role and scope</h2>
+        <p>
+          I joined the Programmable Matter Lab (advisor: Prof. Martin Nisser)
+          in January 2026 as an undergraduate researcher on WireBend-Kit, a
+          machine that automatically bends wire into 3D wireframe shapes
+          from a digital design. The existing system worked in principle —
+          it could execute a bend sequence — but it ran open-loop, which
+          meant every real-world non-ideality quietly became an error in
+          the final geometry.
+        </p>
+        <p>
+          My contribution covers four areas: a new sensing subsystem that
+          measures the actual bend angle after each actuation, a firmware
+          feedback loop that applies a correction pass, a hardware
+          consolidation that collapsed the old multi-MCU architecture down
+          to a single controller, and a Python GUI rewrite that made
+          iterative testing much faster. All of this work is in service of
+          the lab's broader goal: making programmable physical matter
+          reliable enough to actually build things with.
+        </p>
+      </section>
 
       <section class="project-section">
         <h2>Context</h2>
@@ -70,34 +96,67 @@
 
         <h3>Sensing</h3>
         <p>
-          I added electronic angle sensing at the bend point. The sensor reads
-          the actual bend angle after each actuation. The key challenge in
-          sensing is that the wire is under mechanical stress and the sensing
-          geometry changes as the wire deforms, so I needed a sensor placement
-          and design that remained reliable across the full range of bend angles
-          the machine produces.
+          I added electronic angle sensing at the bend point so the machine
+          measures what it actually produced rather than trusting its own
+          kinematic model. The sensor reads the wire's real angular position
+          after each actuation; the firmware then compares that to the
+          commanded angle to compute error.
+        </p>
+        <p>
+          The hard part of sensing wasn't reading an angle — it was reading
+          one <em>reliably</em>. The wire is under mechanical stress during
+          and after the bend, the sensing geometry changes as the wire
+          deforms, and the wire itself is a conductor in a machine full of
+          motor drivers that are happy to couple noise into anything within
+          a few centimeters of them. I spent a lot of bench time iterating
+          on sensor placement, shielding, and the filter stage before
+          getting measurements I'd trust to close a loop around.
         </p>
 
         <h3>Control loop</h3>
         <p>
-          After each bend, the firmware reads the sensor, computes the error
-          between the target angle and the measured angle, and decides whether
-          to command a correction pass. This is a simple proportional correction
-          — not a full PID controller, because the actuator dynamics are slow
-          enough that integral and derivative terms didn't meaningfully improve
-          response. The correction logic had to account for the fact that
-          overbending and then correcting back introduces more work-hardening
-          than getting it right the first time, so the correction magnitude is
-          deliberately conservative.
+          After each bend the firmware reads the sensor, computes
+          <code>error = target − measured</code>, and decides whether to
+          command a correction pass. It's a simple proportional correction —
+          not a full PID — because the actuator dynamics are slow enough
+          that integral and derivative terms didn't meaningfully improve
+          response, and a simpler controller is easier to characterize and
+          debug.
+        </p>
+        <p>
+          The subtlety is that a correction pass isn't free. Overbending and
+          then reverse-correcting introduces extra work-hardening compared
+          to getting the bend right the first time, and that hardening
+          changes how the <em>next</em> bend behaves. So the correction
+          magnitude is deliberately conservative — undershoot and correct
+          once is almost always better than overshoot and reverse.
         </p>
 
         <h3>Firmware consolidation</h3>
         <p>
-          The original machine split its control across multiple
-          microcontrollers, which made it difficult to reason about timing and
-          added latency between the sensing and actuation steps. I refactored
-          the firmware to run on a single controller, which simplified the
-          architecture considerably and reduced the feedback loop latency.
+          The original machine split control across multiple microcontrollers
+          with inter-processor communication driving each step. That made
+          timing hard to reason about: the feedback loop latency was the
+          sum of sensing + serialization + transmission + deserialization +
+          actuation decision + transmission back + actuation, and debugging
+          a glitch meant chasing it across three scopes. I refactored the
+          firmware to run on a single controller, which collapsed the bus
+          communication out of the feedback path entirely. The loop got
+          noticeably faster and the codebase got dramatically easier to
+          reason about — a single event loop instead of a distributed
+          state machine.
+        </p>
+
+        <h3>Hardware-in-the-loop bring-up</h3>
+        <p>
+          Because the machine is the only one of its kind, I couldn't
+          validate changes in pure simulation — every firmware iteration
+          had to be tested against real wire. I set up a repeatable bring-up
+          routine: a known target sequence, measured outputs, and a diff
+          against expected behavior. This let me catch regressions quickly
+          when I changed the sensor filter or the correction gain, without
+          having to manually compare bent-wire samples to a target shape
+          every time.
         </p>
       </section>
 
@@ -127,29 +186,75 @@
       <section class="project-section">
         <h2>Python GUI and tooling</h2>
         <p>
-          The machine is controlled through a Python GUI that I rewrote to
-          make iterative testing faster. The old interface required navigating
-          through multiple screens to issue a single bend command; the new one
-          surfaces the most common operations on the main panel and adds a
-          single-command mode where you can quickly test a specific angle
-          without building a full sequence. This made it much faster to
-          characterize how the machine behaved at different angles and
-          materials.
+          The machine is driven from a host PC through a Python GUI that I
+          rewrote from the ground up to make iterative testing faster. The
+          old interface required navigating through multiple screens to
+          issue a single bend command, which was fine for a demo but
+          terrible for the dozens of single-angle tests I needed to run
+          per session while characterizing the sensor and tuning the
+          correction gain.
+        </p>
+        <p>
+          The new GUI surfaces the common operations on the main panel and
+          adds a single-command mode where I can type an angle and actuate
+          immediately — no sequence-building, no multi-step wizard. I also
+          added a live readout of the sensor value and the most recent
+          measured-vs-target delta, which turned the GUI into a useful
+          debugging instrument on its own. What used to be a minute-long
+          round trip between "I want to try X" and "here's the result"
+          became a few seconds.
         </p>
       </section>
 
       <section class="project-section">
         <h2>Key challenges</h2>
+
+        <h3>Characterizing springback</h3>
         <p>
-          The trickiest part was characterizing the springback behavior. Metal
-          wire doesn't spring back the same amount every time — the amount
-          depends on how much the wire has already been worked. An
-          over-corrected bend followed by a reverse correction adds
-          more hardening than a single accurate bend, and the accumulated error
-          changes the springback coefficient for future bends in the sequence.
-          Getting the correction logic right required building a model of how
-          springback evolves across a sequence rather than treating each bend
-          independently.
+          The core physics problem was springback: metal wire elastically
+          recovers after a bend, and the amount it recovers depends on
+          material properties, wire diameter, and — crucially — how much
+          the wire has already been worked earlier in the sequence. A bend
+          that overshoots and reverse-corrects introduces more hardening
+          than a single accurate bend, and that accumulated hardening
+          changes the springback coefficient for every subsequent bend.
+          Treating each bend as independent — which was the old machine's
+          implicit assumption — led to error that compounded through the
+          sequence.
+        </p>
+        <p>
+          Getting the correction logic right meant building a model of how
+          springback evolves across a sequence, not just a snapshot at a
+          single bend. The controller's conservative-correction behavior
+          falls out of that model: undershooting is cheap to fix, but
+          overshooting costs you not just the current bend but the
+          reliability of everything that comes after.
+        </p>
+
+        <h3>Working on a one-of-a-kind machine</h3>
+        <p>
+          There's no documentation, no reference implementation, no Stack
+          Overflow post for a custom research machine. A meaningful part of
+          the work was archaeology: tracing what the old firmware and
+          electrical system did, figuring out which parts were load-bearing,
+          and deciding what to keep versus replace. I kept a running
+          internal doc on the sensing subsystem, the refactored firmware,
+          and the GUI, so the next student on the project can orient
+          without having to re-derive everything from the code.
+        </p>
+      </section>
+
+      <section class="project-section">
+        <h2>Impact</h2>
+        <p>
+          The closed-loop machine now produces bend sequences repeatably
+          enough to actually use for downstream research on 3D wireframe
+          fabrication — which is the whole reason the project exists.
+          Beyond the technical result, working on WireBend-Kit taught me
+          hardware-in-the-loop control in a setting where I couldn't hide
+          behind simulation, and it's the reason I want to keep working in
+          labs that sit at the intersection of firmware and physical
+          systems.
         </p>
       </section>
 
