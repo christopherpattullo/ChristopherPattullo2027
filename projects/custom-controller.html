@@ -14,7 +14,7 @@
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600;700&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="../styles.css?v=2026-04-17" />
+    <link rel="stylesheet" href="../styles.css?v=2026-04-25" />
   </head>
   <body>
 
@@ -129,6 +129,49 @@
       </section>
 
       <section class="project-section">
+        <h2>The enumeration debug — UVCC and UCAP</h2>
+        <p>
+          The hardest part of the bring-up was getting the ATmega32U4 to
+          enumerate as a USB device at all. The first revision plugged in
+          and the host saw nothing — not even a malformed device, just
+          silence. The chip was running, the bootloader was responsive
+          over ISP, but USB wasn't coming up.
+        </p>
+        <p>
+          Two issues, both in the USB peripheral's analog support
+          circuitry:
+        </p>
+        <ul>
+          <li>
+            <strong>Disconnected UVCC pin.</strong> The 32U4's USB pad
+            driver is supplied through a dedicated UVCC pin separate
+            from the main VCC rail. I'd missed connecting it on the
+            first revision, so the USB transceiver had no power even
+            though the rest of the chip looked fine. Tying UVCC to VCC
+            (with the recommended decoupling) brought the transceiver
+            to life.
+          </li>
+          <li>
+            <strong>Out-of-tolerance UCAP capacitor.</strong> UCAP is
+            the bypass for the on-chip 3.3 V regulator that supplies
+            the USB pads. The datasheet asks for 1 µF; my first
+            placement was a part with enough drift across temperature
+            and DC bias that the effective capacitance was well below
+            spec, which left the regulator unstable and the USB pads
+            in a marginal state. Replacing it with a properly-rated
+            X7R 1 µF cap solved the last enumeration glitch.
+          </li>
+        </ul>
+        <p>
+          Both bugs are the kind of thing where a working board and a
+          dead board look identical on a multimeter. The fix in both
+          cases came from rereading the USB section of the 32U4
+          datasheet line-by-line and comparing every recommended
+          analog connection against what was actually on the board.
+        </p>
+      </section>
+
+      <section class="project-section">
         <h2>Programming via Arduino-as-ISP</h2>
         <p>
           The board ships without a pre-flashed bootloader, so the first
@@ -144,11 +187,19 @@
       <div class="media-grid media-grid--3">
         <figure class="media-slot">
           <img
-            src="../photos/ARUWCustomControllerPCB.png"
-            alt="Assembled custom controller PCB"
+            src="../photos/ARUWCustomController_Built.png"
+            alt="Fully assembled custom controller in its enclosure"
             loading="lazy"
             decoding="async">
-          <figcaption>Assembled PCB</figcaption>
+          <figcaption>Built controller — assembled and enclosed</figcaption>
+        </figure>
+        <figure class="media-slot">
+          <img
+            src="../photos/ARUWCustomControllerPCB.png"
+            alt="Bare custom controller PCB"
+            loading="lazy"
+            decoding="async">
+          <figcaption>PCB after assembly</figcaption>
         </figure>
         <figure class="media-slot">
           <img
@@ -176,12 +227,12 @@
         </figure>
         <figure class="media-slot media-slot--wide">
           <video
-            src="../videos/CustomController_First_tests.MOV"
+            src="../videos/CustomController_First_tests.mp4"
             controls
             preload="metadata"
             aria-label="First functional test of the custom controller">
             Your browser can't play this video format.
-            <a href="../videos/CustomController_First_tests.MOV">Download the video</a>.
+            <a href="../videos/CustomController_First_tests.mp4">Download the video</a>.
           </video>
           <figcaption>First functional test — matrix scan + HID output</figcaption>
         </figure>

@@ -14,7 +14,7 @@
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600;700&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="../styles.css?v=2026-04-17" />
+    <link rel="stylesheet" href="../styles.css?v=2026-04-25" />
   </head>
   <body>
 
@@ -214,13 +214,22 @@
       <section class="project-section">
         <h2>Impact</h2>
         <p>
-          The calibration is now a one-time step per physical board.
-          Firmware can be updated as many times as needed without
-          touching calibration — the constants stay put in their reserved
-          flash region, and the runtime picks them up on every boot.
-          Mislabeled boards and calibration-lost-in-reflash bugs are
-          gone. And the bring-up workflow is now a documented procedure
-          that doesn't require me (or anyone specific) to be in the room.
+          End-to-end, the calibrated Hall-effect current sensors now
+          report to <strong>99.8% accuracy</strong>, and along the way
+          I tuned the CAN stack on the same firmware to handle
+          <strong>20× greater throughput</strong> than the original — the
+          robot's main control board can now ingest sensor telemetry
+          without the bus being the bottleneck.
+        </p>
+        <p>
+          Operationally, calibration is a one-time step per physical
+          board. Firmware can be updated as many times as needed
+          without touching calibration: the constants stay put in their
+          reserved flash region, and the runtime picks them up on every
+          boot. Mislabeled boards and calibration-lost-in-reflash bugs
+          are gone, and the bring-up workflow is now a documented
+          procedure that doesn't require me (or anyone specific) to be
+          in the room.
         </p>
       </section>
 

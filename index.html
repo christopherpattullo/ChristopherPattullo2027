@@ -14,7 +14,7 @@
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600;700&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="styles.css?v=2026-04-17" />
+    <link rel="stylesheet" href="styles.css?v=2026-04-25" />
   </head>
   <body>
 
@@ -84,16 +84,18 @@
           </header>
           <p class="blurb">
             I joined Professor Martin Nisser's Programmable Matter Lab to work
-            on WireBend-Kit, a machine that automatically bends wire into
-            3D wireframes. My main contribution was building a
-            closed-loop feedback system: I added electronic sensing to estimate
-            the actual bend angle after each actuation, then fed that error
-            back into the control loop to apply a correction pass. Along the
-            way I consolidated firmware across multiple microcontrollers down
-            to a single board and rewrote the Python GUI to be more intuitive
-            for iterative testing. It's been a fascinating introduction to
-            hardware-in-the-loop control systems, and I am excited to continue 
-            exploring similar systems.
+            on WireBend-Kit, a machine that automatically bends wire into 3D
+            wireframes. My main contribution has been a contact-detection
+            feedback scheme using a grounded wire and a pulled-up reference
+            peg — when the bending arm makes contact, the firmware sees a
+            digital edge instead of relying on a kinematic model, and bend
+            accuracy improved by 40%. I also converted the manually-operated
+            wire chuck into a software-controlled clamp that automatically
+            engages during bend operations, eliminating slippage-induced
+            errors that used to compound across a sequence. Currently I'm
+            developing a G-code reversal pass that unbends fabricated
+            wireframes back into straight stock so the same wire can be
+            reused.
           </p>
         </article>
       </section>
@@ -111,35 +113,44 @@
             <p class="when">Jun 2024 — Sep 2025</p>
           </header>
           <p class="blurb">
-            At Analog Bits I characterized mixed-signal IP — mainly PLLs and
-            clock generation circuits — by running them through the edges of
-            their operating envelopes: temperature sweeps, voltage corners,
-            frequency limits. I built Python tooling to automate data capture
-            into structured spreadsheets, which saved a lot of tedious manual
-            work. I also rewrote large sections of customer-facing
-            documentation based on support ticket feedback; those revised
-            datasheets reduced follow-up clarification requests by approximately 21%.
+            At Analog Bits I characterized mixed-signal IP — primarily PLLs
+            and clock generation circuits — across their full operating
+            envelopes. I wrote Python automation that drove oscilloscopes,
+            signal generators, thermal chambers, and power supplies in
+            concert, capturing PLL lock time, jitter, and power consumption
+            at every process / voltage / temperature / frequency corner.
+            From the captured data I generated shmoo plots that visualized
+            pass/fail behavior across all four axes simultaneously,
+            flagging silicon anomalies that would have been invisible in a
+            single-corner sweep. I also automated test-spec parsing
+            directly from the team's Excel inputs, removing a manual setup
+            step that the applications team had been doing for every
+            characterization run.
           </p>
         </article>
 
         <article class="entry">
           <header class="entry-head">
             <div>
-              <h3>Electrical Hardware Developer</h3>
+              <h3>Firmware &amp; Hardware Engineer</h3>
               <p class="org">Advanced Robotics at the University of Washington</p>
             </div>
             <p class="when">Sep 2023 — Present</p>
           </header>
           <p class="blurb">
-            I'm on the electrical hardware team for ARUW, UW's RoboMasters
-            competition robotics club. I design and lay out custom PCBs in
-            Altium — power distribution boards, sensor breakouts, motor
-            interfaces — with LTspice simulation before committing to layout.
-            The firmware side runs on embedded Rust using the Embassy async
-            runtime. A notable mechanical contribution: I redesigned the
-            ball-feeding mechanism by changing to a bottom fed architecture and repositioning
-            the turret so its center of gravity sat directly over the yaw
-            axis, which meaningfully improved aiming stability.
+            I write async Rust firmware on STM32 with Embassy for ARUW —
+            UW's RoboMasters competition team — and have built CAN drivers
+            that connect our control and power subsystems. I calibrated the
+            Hall-effect current sensors to 99.8% accuracy and tuned the CAN
+            stack for 20× greater throughput, which removed a real
+            bottleneck in how fast the main control board could ingest
+            telemetry. On the hardware side, I designed a custom PCB and
+            wrote C++ USB HID firmware for an ATmega32U4 operator
+            controller — that one took some debugging: the chip refused to
+            enumerate until I traced the issue to a disconnected UVCC pin
+            and an out-of-tolerance UCAP capacitor. I've also done
+            mechanical work on the sentry, including the bottom-fed turret
+            redesign that lowered the CoG onto the yaw axis.
           </p>
         </article>
 
@@ -179,21 +190,28 @@
 
           <article class="card card--featured">
             <figure class="card-media card-media--featured">
-              <!-- replace div with: <img src="photos/wirebend.jpg" alt="WireBend-Kit machine close-up"> -->
-              <div class="img-placeholder">[ photo ]</div>
+              <img
+                src="photos/Programmable_Matter_BentCube.jpg"
+                alt="3D wireframe cube fabricated by WireBend-Kit"
+                loading="lazy"
+                decoding="async">
             </figure>
             <div class="card-body">
-              <h3><a href="projects/wirebend-kit.html" class="card-link">WireBend-Kit — Angle Feedback</a></h3>
+              <h3><a href="projects/wirebend-kit.html" class="card-link">WireBend-Kit — Contact-Detection Feedback</a></h3>
               <p class="blurb">
-                Added closed-loop angle sensing to the wire-bending research
-                machine. The system reads back the actual bend angle, computes
-                the error, and commands a correction pass — turning an
-                open-loop machine into a reliable, repeatable fabrication tool.
+                Added a contact-detection feedback scheme to the
+                wire-bending research machine — grounded wire, pulled-up
+                reference peg, digital-edge sensing — that improved bend
+                accuracy by 40%. Also converted the manual wire chuck into
+                a software-controlled clamp that eliminated slippage, and
+                am developing a G-code reversal pass to recover straight
+                stock from finished wireframes for material reuse.
               </p>
               <div class="tags">
                 <span class="tag">Python</span>
                 <span class="tag">Embedded C</span>
                 <span class="tag">Control Systems</span>
+                <span class="tag">Research</span>
               </div>
             </div>
           </article>
@@ -264,17 +282,20 @@
 
           <article class="card card--standard">
             <figure class="card-media">
-              <!-- replace div with: <img src="path/to/photo.jpg" alt="Desktop Reminder Buddy device"> -->
-              <div class="img-placeholder">[ photo ]</div>
+              <img
+                src="photos/DesktopReminderBuddy.png"
+                alt="Desktop Reminder Buddy device on a desk"
+                loading="lazy"
+                decoding="async">
             </figure>
             <div class="card-body">
               <h3><a href="projects/desktop-reminder.html" class="card-link">Desktop Reminder Buddy</a></h3>
               <p class="blurb">
-                A physical ambient calendar display next to my monitor. ESP32
-                firmware in C handles I²C display comms and UART data
-                ingestion from a Python host script. The core challenge: a
-                parser that filters and truncates event strings within a
-                fixed-width display buffer.
+                A physical ambient calendar display sitting next to my
+                monitor. Custom interrupt-driven UART driver on ESP32
+                ingests filtered to-do events from a Python host script
+                and renders them on an I²C display. Wi-Fi support added as
+                an alternative path for wireless updates.
               </p>
               <div class="tags">
                 <span class="tag">C</span>
@@ -287,22 +308,28 @@
 
           <article class="card card--standard">
             <figure class="card-media">
-              <!-- replace div with: <img src="path/to/photo.jpg" alt="Smart Plants soil monitoring system"> -->
-              <div class="img-placeholder">[ photo ]</div>
+              <img
+                src="photos/SmartPlantsGUI.png"
+                alt="Smart Plants dashboard showing moisture readings"
+                loading="lazy"
+                decoding="async">
             </figure>
             <div class="card-body">
               <h3><a href="projects/smart-plants.html" class="card-link">Smart Plants</a></h3>
               <p class="blurb">
-                Automated soil moisture monitoring with a watering relay.
-                FreeRTOS on ESP32 wakes on a 15-minute timer, samples the ADC,
-                and triggers a relay below threshold. A startup calibration
-                routine was essential — capacitive soil sensors drift a lot.
+                FreeRTOS on ESP32 schedules capacitive soil moisture
+                readings every 15 minutes and deep-sleeps in between for
+                low idle current. A MOSFET-controlled pump fires on
+                watering commands issued by a Raspberry Pi companion
+                running a small ML model on the sensor stream, and an LCD
+                surface shows moisture, last-watering, and plant status.
               </p>
               <div class="tags">
                 <span class="tag">C</span>
                 <span class="tag">FreeRTOS</span>
                 <span class="tag">ESP32</span>
-                <span class="tag">ADC</span>
+                <span class="tag">Raspberry Pi</span>
+                <span class="tag">ML</span>
               </div>
             </div>
           </article>
@@ -331,8 +358,11 @@
 
           <article class="card card--standard">
             <figure class="card-media">
-              <!-- replace div with: <img src="path/to/photo.jpg" alt="Viva app on phone"> -->
-              <div class="img-placeholder">[ photo ]</div>
+              <img
+                src="photos/VivaHomepage.png"
+                alt="Viva event platform homepage"
+                loading="lazy"
+                decoding="async">
             </figure>
             <div class="card-body">
               <h3><a href="projects/viva.html" class="card-link">Viva — Event Platform</a></h3>
@@ -441,20 +471,22 @@
         <div class="skill-grid">
           <div>
             <h4>Languages</h4>
-            <p>C, C++, Rust, Python, MATLAB, Java, JavaScript, Verilog</p>
+            <p>C, C++, Rust, Python, MATLAB, Java, System Verilog</p>
           </div>
           <div>
             <h4>Hardware</h4>
             <p>
-              FPGA, PCB design &amp; layout, soldering, 3D printing, I²C,
-              UART, LTspice, PLECS
+              FPGA, PCB design &amp; layout, embedded systems, soldering,
+              3D modeling, 3D printing, laser cutting, iterative design,
+              I²C, UART
             </p>
           </div>
           <div>
-            <h4>Tools</h4>
+            <h4>Software &amp; Tools</h4>
             <p>
-              Altium, KiCad, Quartus, IAR, Ozone, Segger J-Link, NI Multisim,
-              SolidWorks, Fusion, OnShape
+              Ozone, Segger J-Link, Git, Altium, Quartus, IAR Embedded
+              Workbench, NI Multisim, KiCad, SolidWorks, Fusion, Inventor,
+              OnShape
             </p>
           </div>
         </div>
@@ -497,7 +529,7 @@
     </main>
 
     <!-- Photo list lives in photos.js — edit that file to add/remove photos. -->
-    <script src="photos.js?v=2026-04-17"></script>
+    <script src="photos.js?v=2026-04-25"></script>
     <script>
       // Build the photo grid from window.PHOTOS, then wire up the expand button.
       (function () {

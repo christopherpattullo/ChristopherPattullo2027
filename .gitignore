@@ -1,0 +1,13 @@
+# Source video files — too large for GitHub. Keep compressed .mp4 versions instead.
+videos/*.mov
+videos/*.MOV
+
+# Local Claude Code session data — should never be committed
+.claude/
+
+# OS / editor cruft
+.DS_Store
+Thumbs.db
+desktop.ini
+*.swp
+*~

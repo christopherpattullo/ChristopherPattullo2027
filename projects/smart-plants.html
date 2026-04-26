@@ -14,7 +14,7 @@
       href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="../styles.css?v=2026-04-17" />
+    <link rel="stylesheet" href="../styles.css?v=2026-04-25" />
   </head>
   <body>
 
@@ -33,15 +33,18 @@
         <a class="project-back" href="../index.html#projects">← All projects</a>
         <h1>Smart Plants</h1>
         <p class="project-tagline">
-          Automated soil moisture monitoring with a relay-driven watering
-          system — ESP32, FreeRTOS, and capacitive sensing.
+          ESP32 + FreeRTOS firmware for periodic capacitive soil moisture
+          sensing, paired with a Raspberry Pi companion service running a
+          small ML model that decides when to actually water — closing
+          the loop with a MOSFET-driven pump and an LCD status panel.
         </p>
         <div class="tags">
           <span class="tag">C</span>
           <span class="tag">FreeRTOS</span>
           <span class="tag">ESP32</span>
           <span class="tag">ADC</span>
-          <span class="tag">Embedded Systems</span>
+          <span class="tag">Raspberry Pi</span>
+          <span class="tag">ML</span>
         </div>
       </header>
 
@@ -64,59 +67,61 @@
       <section class="project-section">
         <h2>How it works</h2>
 
-        <h3>Sensing</h3>
+        <h3>ESP32 firmware on FreeRTOS</h3>
         <p>
-          Soil moisture is measured with a capacitive sensor connected to the
-          ESP32's ADC. Capacitive sensors measure the dielectric constant of
-          the soil, which changes with water content — as opposed to resistive
-          sensors that pass current through the soil and corrode quickly. The
-          ADC reading is a 12-bit value that needs to be mapped to a meaningful
-          moisture percentage, which is where calibration comes in.
+          The ESP32 firmware runs on FreeRTOS and schedules a soil
+          moisture reading every 15 minutes via a capacitive sensor on
+          the ADC. Between readings the chip drops into deep sleep,
+          which keeps the idle current draw low enough that the system
+          can run off a small power supply without breaking a sweat.
+          When a watering command comes in, the firmware drives a
+          MOSFET that gates the pump — the MCU itself never has to
+          source pump current, just the gate signal.
+        </p>
+        <p>
+          Capacitive sensors were the right choice over resistive: they
+          measure the dielectric constant of the soil rather than
+          passing current through it, so they don't corrode and they
+          give stable readings over months in damp soil.
         </p>
 
-        <h3>FreeRTOS task structure</h3>
+        <h3>Raspberry Pi companion + ML model</h3>
         <p>
-          The firmware is organized into three tasks. A timer task wakes on a
-          15-minute interval and signals the sensing task. The sensing task
-          takes an ADC reading, applies the calibration curve, and decides
-          whether to trigger the relay. A third task is reserved for a display
-          interface that's currently in progress.
+          The decision of <em>when</em> to actually water lives on a
+          Raspberry Pi running as a companion service rather than on
+          the MCU. The ESP32 publishes its moisture readings to the Pi,
+          a small ML model on the Pi consumes the time-series, and the
+          Pi sends back watering commands when the model decides
+          irrigation is needed.
         </p>
         <p>
-          Using FreeRTOS for what's essentially a simple loop might seem like
-          overkill, but it made adding features — like a future Wi-Fi task for
-          remote logging — straightforward without restructuring the whole
-          program.
+          Splitting it that way kept the firmware simple and the
+          decision-making flexible: model updates happen on the Pi
+          without re-flashing the MCU, and the Pi can pull in
+          additional context (recent watering history, plant type,
+          even ambient conditions) that the ESP32 wouldn't have access
+          to on its own. The ESP32 stays as a deterministic sensor
+          and actuator; the Pi handles the intelligence.
         </p>
 
-        <h3>Calibration</h3>
+        <h3>LCD interface</h3>
         <p>
-          Capacitive moisture sensors drift significantly between batches, and
-          the relationship between ADC value and actual moisture percentage
-          depends on soil type. At startup, the firmware runs a two-point
-          calibration: it reads the sensor in dry air (0% moisture) and in a
-          water-saturated sample (100% moisture), stores those endpoints, and
-          uses linear interpolation for everything in between. This takes about
-          30 seconds and makes the readings meaningful regardless of sensor
-          or soil variation.
+          A local LCD shows current moisture level, the last watering
+          event, and a status indication for whether the plant is
+          happy. On-device logging keeps a record of recent readings
+          and watering events so I can scroll through the history
+          without needing to look at the Pi side.
         </p>
       </section>
 
       <div class="media-grid">
-        <figure class="media-slot">
-          <!-- replace with <img src="../img/plants-device.jpg" alt="Smart Plants device next to a plant"> -->
-          <div class="img-placeholder">[ device in use ]</div>
-          <figcaption>System deployed next to the plant</figcaption>
-        </figure>
-        <figure class="media-slot">
-          <!-- replace with <img src="../img/plants-sensor.jpg" alt="Soil moisture sensor in soil"> -->
-          <div class="img-placeholder">[ sensor in soil ]</div>
-          <figcaption>Capacitive sensor probes</figcaption>
-        </figure>
-        <figure class="media-slot">
-          <!-- replace with <img src="../img/plants-board.jpg" alt="ESP32 board with relay and sensor"> -->
-          <div class="img-placeholder">[ breadboard setup ]</div>
-          <figcaption>ESP32, relay module, and sensor</figcaption>
+        <figure class="media-slot media-slot--wide">
+          <img
+            src="../photos/SmartPlantsGUI.png"
+            alt="Smart Plants dashboard showing moisture readings and status"
+            loading="lazy"
+            decoding="async">
+          <figcaption>Smart Plants dashboard — live moisture readings and watering history</figcaption>
         </figure>
       </div>
 

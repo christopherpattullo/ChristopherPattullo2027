@@ -14,7 +14,7 @@
       href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="../styles.css?v=2026-04-17" />
+    <link rel="stylesheet" href="../styles.css?v=2026-04-25" />
   </head>
   <body>
 
@@ -40,10 +40,10 @@
         <div class="tags">
           <span class="tag">C</span>
           <span class="tag">ESP32</span>
-          <span class="tag">FreeRTOS</span>
+          <span class="tag">Interrupt-Driven UART</span>
           <span class="tag">I²C</span>
-          <span class="tag">UART</span>
           <span class="tag">Python</span>
+          <span class="tag">Wi-Fi</span>
         </div>
       </header>
 
@@ -70,50 +70,53 @@
 
         <h3>Host-side Python script</h3>
         <p>
-          The Python script uses the Google Calendar API to fetch upcoming
-          events, filters them down to what's relevant (next 24 hours,
-          ignoring all-day events), formats the data into a compact serial
-          protocol, and sends it over a virtual COM port to the ESP32. It runs
-          on a polling interval so the display stays current.
+          The Python script queries Google Calendar, filters the results
+          down to what's actually relevant for the next day (skipping
+          all-day events, hiding events I've already attended), tags each
+          remaining event as a to-do item, and ships them to the ESP32
+          over UART. Because the filtering happens host-side, the
+          microcontroller never sees the noisy raw calendar data — it
+          gets a small, already-prioritized list to render.
         </p>
 
-        <h3>Firmware: UART ingestion and parsing</h3>
+        <h3>Custom interrupt-driven UART driver</h3>
         <p>
-          The firmware's main job is receiving the serial data and rendering
-          it on the display. I wrote a custom parser that handles
-          variable-length strings, enforces a maximum display width per line
-          (the OLED is 128px wide at our font size, which limits you to around
-          16 characters), and truncates gracefully with an ellipsis rather
-          than cutting mid-word. Getting that last bit right — truncating at
-          word boundaries — was fussier than expected.
+          The firmware's main job is receiving that serial stream
+          reliably while still driving the display. I wrote a custom
+          interrupt-driven UART driver on the ESP32 side rather than
+          polling — incoming bytes go straight into a ring buffer from
+          the ISR, and the main loop drains the buffer at its own pace.
+          That decouples ingestion from rendering and means a long
+          display update can't make us miss a serial frame.
+        </p>
+        <p>
+          The parser on top of that handles variable-length to-do
+          strings, enforces a maximum display width per line (the OLED
+          is 128 px wide at our font size, which works out to about 16
+          characters), and truncates gracefully with an ellipsis at word
+          boundaries rather than cutting mid-word.
         </p>
 
         <h3>Display rendering via I²C</h3>
         <p>
-          The OLED is driven over I²C using the SSD1306 controller. I used an
-          ESP-IDF I²C driver directly rather than an Arduino library, which
-          gave me more control over the transaction timing but required reading
-          the controller datasheet more carefully. The display shows the event
-          name on line one, the time on line two, and a progress bar indicating
-          how far through the current event you are.
+          The OLED is driven over I²C using the SSD1306 controller. I
+          used the ESP-IDF I²C driver directly rather than going through
+          an Arduino wrapper, which gave me more control over transaction
+          timing but required reading the controller datasheet more
+          carefully. The display shows the event name on line one, the
+          time on line two, and a progress bar indicating how far
+          through the current event you are.
         </p>
       </section>
 
       <div class="media-grid">
-        <figure class="media-slot">
-          <!-- replace with <img src="../img/reminder-device.jpg" alt="Finished device on desk"> -->
-          <div class="img-placeholder">[ finished device ]</div>
-          <figcaption>On the desk</figcaption>
-        </figure>
-        <figure class="media-slot">
-          <!-- replace with <img src="../img/reminder-display.jpg" alt="OLED display showing calendar event"> -->
-          <div class="img-placeholder">[ OLED display ]</div>
-          <figcaption>Display showing upcoming event</figcaption>
-        </figure>
-        <figure class="media-slot">
-          <!-- replace with <img src="../img/reminder-board.jpg" alt="ESP32 board and wiring"> -->
-          <div class="img-placeholder">[ ESP32 board ]</div>
-          <figcaption>ESP32 and display wiring</figcaption>
+        <figure class="media-slot media-slot--wide">
+          <img
+            src="../photos/DesktopReminderBuddy.png"
+            alt="Desktop Reminder Buddy device showing the next calendar event"
+            loading="lazy"
+            decoding="async">
+          <figcaption>The device next to my monitor, showing the next calendar event</figcaption>
         </figure>
       </div>
 
@@ -145,12 +148,16 @@
           key thing that makes it useful day-to-day.
         </p>
         <p>
-          The obvious next step is cutting the USB cable. I prototyped a Wi-Fi
-          path where the ESP32 queries the calendar API directly using its
-          built-in Wi-Fi, which would make the device fully standalone. The
-          main obstacle is OAuth token management on a microcontroller with no
-          secure storage — I'm still thinking through the right way to handle
-          credential persistence without compromising the token.
+          I also implemented a Wi-Fi alternative to the UART path: the
+          ESP32 can pull updates wirelessly from the host, which removes
+          the USB tether and means I can put the device anywhere on the
+          desk without running a cable. The Wi-Fi path mirrors the same
+          serial protocol so the firmware doesn't need to know which
+          transport is in use — same parser, same renderer, different
+          source of bytes. OAuth token management on a microcontroller
+          with no secure storage is still an open problem if I want the
+          device to query Google Calendar directly without the host
+          script in the loop.
         </p>
       </section>
 

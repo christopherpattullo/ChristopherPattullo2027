@@ -6,15 +6,15 @@
     <title>WireBend-Kit — Christopher Pattullo</title>
     <meta
       name="description"
-      content="Adding closed-loop angle feedback to a wire-bending research machine at the UW Programmable Matter Lab."
+      content="Contact-detection feedback, a software-controlled wire chuck, and a G-code reversal pass for the WireBend-Kit machine at the UW Programmable Matter Lab."
     />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600;700&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="../styles.css?v=2026-04-17" />
+    <link rel="stylesheet" href="../styles.css?v=2026-04-25" />
   </head>
   <body>
 
@@ -31,241 +31,193 @@
 
       <header class="project-hero">
         <a class="project-back" href="../index.html#projects">← All projects</a>
-        <h1>WireBend-Kit — Angle Feedback</h1>
+        <h1>WireBend-Kit — Contact-Detection Feedback</h1>
         <p class="project-tagline">
-          Closing the loop on a wire-bending fabrication machine at the UW
-          Programmable Matter Lab — adding electronic angle sensing, a
-          correction pass, and a consolidated firmware / GUI stack that
-          turned an open-loop research prototype into a repeatable
-          fabrication tool.
+          Three pieces of work on WireBend-Kit at the UW Programmable Matter
+          Lab: contact-detection feedback that improved bend accuracy by 40%,
+          a manual-to-software conversion of the wire chuck that eliminated
+          slippage, and an in-progress G-code reversal pass that unbends
+          finished wireframes back into reusable straight stock.
         </p>
         <div class="tags">
           <span class="tag">Python</span>
           <span class="tag">Embedded C</span>
           <span class="tag">Control Systems</span>
-          <span class="tag">Hardware-in-the-Loop</span>
+          <span class="tag">G-code</span>
           <span class="tag">Research</span>
           <span class="tag">Programmable Matter Lab</span>
         </div>
       </header>
 
       <section class="project-section">
-        <h2>Role and scope</h2>
+        <h2>The lab and the machine</h2>
         <p>
-          I joined the Programmable Matter Lab (advisor: Prof. Martin Nisser)
-          in January 2026 as an undergraduate researcher on WireBend-Kit, a
-          machine that automatically bends wire into 3D wireframe shapes
-          from a digital design. The existing system worked in principle —
-          it could execute a bend sequence — but it ran open-loop, which
-          meant every real-world non-ideality quietly became an error in
-          the final geometry.
+          WireBend-Kit is a research machine at the UW Programmable Matter
+          Lab (advisor: Prof. Martin Nisser) that automatically bends wire
+          into 3D wireframe shapes from a digital design. A user supplies
+          a sequence of bend operations as G-code, and the machine
+          actuates the wire through a series of forming passes.
         </p>
         <p>
-          My contribution covers four areas: a new sensing subsystem that
-          measures the actual bend angle after each actuation, a firmware
-          feedback loop that applies a correction pass, a hardware
-          consolidation that collapsed the old multi-MCU architecture down
-          to a single controller, and a Python GUI rewrite that made
-          iterative testing much faster. All of this work is in service of
-          the lab's broader goal: making programmable physical matter
-          reliable enough to actually build things with.
-        </p>
-      </section>
-
-      <section class="project-section">
-        <h2>Context</h2>
-        <p>
-          WireBend-Kit is a research machine built at the UW Programmable
-          Matter Lab (advisor: Professor Martin Nisser) that automatically
-          bends wire into 3D shapes from a digital design. A user specifies
-          a sequence of bend angles, and the machine actuates the wire through
-          a series of forming passes.
-        </p>
-        <p>
-          The problem when I joined the project was repeatability. Metal wire
-          springs back after bending — the "springback" angle depends on
-          material properties, work-hardening from previous bends, and slight
-          variations in wire diameter. The machine was issuing commands based
-          on a fixed kinematic model, but the actual output angles drifted,
-          and errors accumulated across a sequence of bends.
-        </p>
-      </section>
-
-      <section class="project-section">
-        <h2>The feedback system</h2>
-
-        <h3>Sensing</h3>
-        <p>
-          I added electronic angle sensing at the bend point so the machine
-          measures what it actually produced rather than trusting its own
-          kinematic model. The sensor reads the wire's real angular position
-          after each actuation; the firmware then compares that to the
-          commanded angle to compute error.
-        </p>
-        <p>
-          The hard part of sensing wasn't reading an angle — it was reading
-          one <em>reliably</em>. The wire is under mechanical stress during
-          and after the bend, the sensing geometry changes as the wire
-          deforms, and the wire itself is a conductor in a machine full of
-          motor drivers that are happy to couple noise into anything within
-          a few centimeters of them. I spent a lot of bench time iterating
-          on sensor placement, shielding, and the filter stage before
-          getting measurements I'd trust to close a loop around.
-        </p>
-
-        <h3>Control loop</h3>
-        <p>
-          After each bend the firmware reads the sensor, computes
-          <code>error = target − measured</code>, and decides whether to
-          command a correction pass. It's a simple proportional correction —
-          not a full PID — because the actuator dynamics are slow enough
-          that integral and derivative terms didn't meaningfully improve
-          response, and a simpler controller is easier to characterize and
-          debug.
-        </p>
-        <p>
-          The subtlety is that a correction pass isn't free. Overbending and
-          then reverse-correcting introduces extra work-hardening compared
-          to getting the bend right the first time, and that hardening
-          changes how the <em>next</em> bend behaves. So the correction
-          magnitude is deliberately conservative — undershoot and correct
-          once is almost always better than overshoot and reverse.
-        </p>
-
-        <h3>Firmware consolidation</h3>
-        <p>
-          The original machine split control across multiple microcontrollers
-          with inter-processor communication driving each step. That made
-          timing hard to reason about: the feedback loop latency was the
-          sum of sensing + serialization + transmission + deserialization +
-          actuation decision + transmission back + actuation, and debugging
-          a glitch meant chasing it across three scopes. I refactored the
-          firmware to run on a single controller, which collapsed the bus
-          communication out of the feedback path entirely. The loop got
-          noticeably faster and the codebase got dramatically easier to
-          reason about — a single event loop instead of a distributed
-          state machine.
-        </p>
-
-        <h3>Hardware-in-the-loop bring-up</h3>
-        <p>
-          Because the machine is the only one of its kind, I couldn't
-          validate changes in pure simulation — every firmware iteration
-          had to be tested against real wire. I set up a repeatable bring-up
-          routine: a known target sequence, measured outputs, and a diff
-          against expected behavior. This let me catch regressions quickly
-          when I changed the sensor filter or the correction gain, without
-          having to manually compare bent-wire samples to a target shape
-          every time.
+          I joined the project as an undergraduate researcher in January
+          2026. The machine worked, but every real-world non-ideality
+          quietly turned into error in the final geometry — small
+          positional inaccuracies, slipping wire, accumulating drift across
+          a sequence. My contributions have all been in service of one
+          goal: making WireBend-Kit reliable enough to actually fabricate
+          things with.
         </p>
       </section>
 
       <div class="media-grid">
-        <figure class="media-slot">
-          <!-- replace with <img src="../img/wirebend-machine.jpg" alt="WireBend-Kit machine"> -->
-          <div class="img-placeholder">[ WireBend-Kit machine ]</div>
-          <figcaption>The WireBend-Kit machine</figcaption>
-        </figure>
-        <figure class="media-slot">
-          <!-- replace with <img src="../img/wirebend-sensor.jpg" alt="Angle sensing setup"> -->
-          <div class="img-placeholder">[ angle sensor ]</div>
-          <figcaption>Electronic angle sensing at the bend point</figcaption>
-        </figure>
-        <figure class="media-slot">
-          <!-- replace with <img src="../img/wirebend-output.jpg" alt="Wire bent to target shape"> -->
-          <div class="img-placeholder">[ bent wire sample ]</div>
-          <figcaption>Output accuracy with closed-loop correction</figcaption>
-        </figure>
-        <figure class="media-slot">
-          <!-- replace with <img src="../img/wirebend-gui.jpg" alt="Python GUI control panel"> -->
-          <div class="img-placeholder">[ Python GUI ]</div>
-          <figcaption>Control panel GUI</figcaption>
+        <figure class="media-slot media-slot--wide">
+          <img
+            src="../photos/Programmable_Matter_BentCube.jpg"
+            alt="A 3D wireframe cube fabricated by WireBend-Kit"
+            loading="lazy"
+            decoding="async">
+          <figcaption>3D wireframe cube fabricated end-to-end by the machine</figcaption>
         </figure>
       </div>
 
       <section class="project-section">
-        <h2>Python GUI and tooling</h2>
+        <h2>Contact-detection feedback (40% accuracy improvement)</h2>
         <p>
-          The machine is driven from a host PC through a Python GUI that I
-          rewrote from the ground up to make iterative testing faster. The
-          old interface required navigating through multiple screens to
-          issue a single bend command, which was fine for a demo but
-          terrible for the dozens of single-angle tests I needed to run
-          per session while characterizing the sensor and tuning the
-          correction gain.
+          The original machine ran open-loop: it issued bend commands
+          based on a fixed kinematic model and trusted that the output
+          matched the request. That works on paper but the physical
+          system disagrees — wire diameter varies, work-hardening shifts
+          springback as a sequence progresses, and small positioning
+          errors compound.
         </p>
         <p>
-          The new GUI surfaces the common operations on the main panel and
-          adds a single-command mode where I can type an angle and actuate
-          immediately — no sequence-building, no multi-step wizard. I also
-          added a live readout of the sensor value and the most recent
-          measured-vs-target delta, which turned the GUI into a useful
-          debugging instrument on its own. What used to be a minute-long
-          round trip between "I want to try X" and "here's the result"
-          became a few seconds.
-        </p>
-      </section>
-
-      <section class="project-section">
-        <h2>Key challenges</h2>
-
-        <h3>Characterizing springback</h3>
-        <p>
-          The core physics problem was springback: metal wire elastically
-          recovers after a bend, and the amount it recovers depends on
-          material properties, wire diameter, and — crucially — how much
-          the wire has already been worked earlier in the sequence. A bend
-          that overshoots and reverse-corrects introduces more hardening
-          than a single accurate bend, and that accumulated hardening
-          changes the springback coefficient for every subsequent bend.
-          Treating each bend as independent — which was the old machine's
-          implicit assumption — led to error that compounded through the
-          sequence.
+          Rather than try to model all of that, I added a much simpler
+          signal: a <em>contact-detection</em> feedback path. The wire
+          itself becomes a circuit element — held at ground — and a
+          reference peg is held at logic high through a pull-up resistor.
+          When the bending arm drives the wire into contact with the peg,
+          the pull-up gets pulled down, and the firmware sees a clean
+          digital edge at the moment of contact.
         </p>
         <p>
-          Getting the correction logic right meant building a model of how
-          springback evolves across a sequence, not just a snapshot at a
-          single bend. The controller's conservative-correction behavior
-          falls out of that model: undershooting is cheap to fix, but
-          overshooting costs you not just the current bend but the
-          reliability of everything that comes after.
+          That edge is the ground truth the machine was missing. Instead
+          of opening the loop and hoping the kinematic model is right,
+          the firmware now drives toward the reference and stops on
+          contact — cancelling out small positioning errors,
+          inconsistencies in wire diameter, and most of the
+          springback effects in one shot. End-to-end bend accuracy
+          improved by 40%.
         </p>
-
-        <h3>Working on a one-of-a-kind machine</h3>
         <p>
-          There's no documentation, no reference implementation, no Stack
-          Overflow post for a custom research machine. A meaningful part of
-          the work was archaeology: tracing what the old firmware and
-          electrical system did, figuring out which parts were load-bearing,
-          and deciding what to keep versus replace. I kept a running
-          internal doc on the sensing subsystem, the refactored firmware,
-          and the GUI, so the next student on the project can orient
-          without having to re-derive everything from the code.
+          The implementation detail that took the most iteration was
+          electrical: the wire is a long, thin conductor running through
+          a machine full of motor drivers. Without proper layout and a
+          dedicated current-limited path to ground, contact detection
+          would either trigger on motor noise or miss the actual contact
+          edge. Once the routing was clean and the pull-up was sized
+          properly for the parasitic capacitance, the signal became
+          rock-solid.
         </p>
       </section>
 
       <section class="project-section">
-        <h2>Impact</h2>
+        <h2>Software-controlled wire chuck</h2>
         <p>
-          The closed-loop machine now produces bend sequences repeatably
-          enough to actually use for downstream research on 3D wireframe
-          fabrication — which is the whole reason the project exists.
-          Beyond the technical result, working on WireBend-Kit taught me
-          hardware-in-the-loop control in a setting where I couldn't hide
-          behind simulation, and it's the reason I want to keep working in
-          labs that sit at the intersection of firmware and physical
-          systems.
+          The wire chuck — the clamp that holds the wire stationary
+          during a bend — used to be operated by hand. An operator
+          tightened it before each bend and loosened it before each feed
+          motion. It worked, but it introduced two problems: an inherent
+          rate limit (the operator had to be physically there for every
+          bend), and a reliability problem when the operator forgot to
+          re-tighten or under-tightened, causing the wire to slip
+          mid-bend and corrupt the rest of the sequence.
+        </p>
+        <p>
+          I converted the chuck into a software-controlled clamp that
+          automatically engages at the start of each bend and releases
+          before the next feed, all driven from the same firmware that
+          schedules bend operations. From the operator's perspective the
+          chuck simply ceases to exist as a manual step; from the
+          machine's perspective, slippage as a failure mode is gone.
+          That alone removed a whole class of mid-sequence errors that
+          used to compound through the rest of a part.
+        </p>
+      </section>
+
+      <div class="media-grid">
+        <figure class="media-slot media-slot--wide">
+          <video
+            src="../videos/WireBendingTest_4x.mp4"
+            controls
+            autoplay
+            muted
+            loop
+            playsinline
+            preload="metadata"
+            aria-label="WireBend-Kit performing a bend sequence (sped up 4x)">
+            Your browser can't play this video format.
+            <a href="../videos/WireBendingTest_4x.mp4">Download the video</a>.
+          </video>
+          <figcaption>WireBend-Kit running a bend sequence (sped up 4×)</figcaption>
+        </figure>
+      </div>
+
+      <section class="project-section">
+        <h2>G-code reversal — material reuse (in progress)</h2>
+        <p>
+          Wireframe research is iterative — you bend a part, you measure
+          it, you tweak the design, you bend the next one. That's a lot
+          of wire ending up in the scrap bin. The current piece of work
+          on my plate is a G-code reversal pass: take a finished bent
+          wireframe, generate the inverse sequence, and have the machine
+          unbend it back into straight stock.
+        </p>
+        <p>
+          The core of it is reversing the G-code in time and inverting
+          each bend's sign. The interesting part is what happens at the
+          edges of that idea: the wire has been work-hardened by the
+          original sequence, so the unbend has different springback
+          characteristics than the bend did, and a naive reversal leaves
+          the wire visibly bowed. I'm working through how much of that
+          can be solved with the same contact-detection feedback used
+          on the forward pass and how much requires explicit
+          characterization of the work-hardening curve.
+        </p>
+        <p>
+          When it works, every wireframe becomes a recoverable asset
+          rather than a one-shot consumption of stock — which matters
+          for both research iteration speed and material cost.
         </p>
       </section>
 
       <section class="project-section">
-        <h2>What I'd do differently</h2>
+        <h2>Tooling and workflow</h2>
         <p>
-          I'd invest more time in modeling the material behavior up front
-          rather than tuning the correction gain empirically. A proper
-          material characterization — measuring springback as a function of
-          bend angle and prior work history — would let the controller adapt
-          automatically to different wire types without manual re-tuning.
+          Day-to-day the machine is driven from a Python host that talks
+          to the on-board firmware. I rebuilt parts of the host script
+          to make iteration faster: a single-bend test mode that lets
+          me trigger an individual operation without composing a whole
+          sequence, plus a live readout of the contact-detection signal
+          so I can verify the feedback path is working before each new
+          part. Bring-up of every new feature has been hardware-in-the-
+          loop on the actual machine — there's no reference
+          implementation or simulator for a one-of-a-kind research rig,
+          which makes good bench tooling worth a lot.
+        </p>
+      </section>
+
+      <section class="project-section">
+        <h2>Why this work matters to me</h2>
+        <p>
+          Programmable matter sits exactly at the intersection of firmware,
+          physical systems, and a research goal that will only work if
+          someone makes the underlying hardware reliable. WireBend-Kit
+          taught me to treat sensing as the first move rather than the
+          last — the contact-detection scheme is a simpler, more accurate
+          system than any of the kinematic-modeling alternatives I
+          considered, and it generalizes. I'd love to keep working in
+          labs where the bottleneck between an idea and a result is the
+          control system holding it together.
         </p>
       </section>
 
