@@ -14,7 +14,7 @@
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600;700&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="styles.css?v=2026-04-25" />
+    <link rel="stylesheet" href="styles.css?v=2026-04-25b" />
   </head>
   <body>
 
@@ -190,11 +190,15 @@
 
           <article class="card card--featured">
             <figure class="card-media card-media--featured">
-              <img
-                src="photos/Programmable_Matter_BentCube.jpg"
-                alt="3D wireframe cube fabricated by WireBend-Kit"
-                loading="lazy"
-                decoding="async">
+              <video
+                src="videos/WireBendingTest_4x.mp4"
+                autoplay
+                muted
+                loop
+                playsinline
+                preload="metadata"
+                aria-label="WireBend-Kit performing a bend sequence">
+              </video>
             </figure>
             <div class="card-body">
               <h3><a href="projects/wirebend-kit.html" class="card-link">WireBend-Kit — Contact-Detection Feedback</a></h3>
@@ -529,7 +533,7 @@
     </main>
 
     <!-- Photo list lives in photos.js — edit that file to add/remove photos. -->
-    <script src="photos.js?v=2026-04-25"></script>
+    <script src="photos.js?v=2026-04-25b"></script>
     <script>
       // Build the photo grid from window.PHOTOS, then wire up the expand button.
       (function () {
